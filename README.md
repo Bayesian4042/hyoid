@@ -13,6 +13,10 @@ This is an end to end worflow for voice agent -> speech to text[deepgram] and te
 4. whenever you call the twilio number with webhook as api https://{domain}/conversations/incoming-call
 5. you should be able to converse.
 
+## for domain
+1. run ngrok http 8000
+2. this will give a domain url, which you can use
+
 # Configure twilio
 1. Go to **console.twilio.com**
 2. Go to Active number
