@@ -1,9 +1,11 @@
 import {
 	Body,
 	Controller,
+	Get,
 	HttpCode,
 	HttpStatus,
 	Param,
+	Patch,
 	Post,
 } from "@nestjs/common";
 import { AgentsService } from "./agents.service";
@@ -15,12 +17,12 @@ export class AgentsController {
 
 	@Post()
 	@HttpCode(HttpStatus.CREATED)
-	async createAgent(@Body() createAgentDto: { name: string }) {
-		const newAgent = this.agentsService.create(createAgentDto);
+	async createAgent(@Body() createAgentDto: { name: string, phoneNumber: string }) {
+		const newAgent = await this.agentsService.create(createAgentDto);
 		return ResponseUtil.success(newAgent);
 	}
 
-	@Post(":id")
+	@Patch(":id")
 	@HttpCode(HttpStatus.OK)
 	async updateAgent(
 		@Param("id") id: string,
@@ -28,5 +30,11 @@ export class AgentsController {
 	) {
 		const updatedAgent = this.agentsService.update(id, updateAgentDto);
 		return ResponseUtil.success(updatedAgent);
+	}
+
+	@Get(":id")
+	async getAgent(@Param("id") id: string) {
+		const agent = await this.agentsService.getAgent(id);
+		return ResponseUtil.success(agent);
 	}
 }

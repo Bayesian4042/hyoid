@@ -1,5 +1,5 @@
 // src/twilio/twilio.controller.ts
-import { Controller, Get, Logger, Post, Res } from "@nestjs/common";
+import { Body, Controller, Get, Logger, Post, Req, Res } from "@nestjs/common";
 import { Response } from "express";
 import { ConfigService } from "@nestjs/config";
 import { TwilioService } from "./twilio.service";
@@ -18,9 +18,10 @@ export class TwilioController {
 	}
 
 	@Post("/incoming-call")
-	async handleTwilioStream(@Res() res: Response) {
+	async handleTwilioStream(@Body() body: any, @Res() res: Response) {
 		try {
-			console.log("Incoming call from Twilio");
+			console.log("Incoming call from Twilio", body);
+			const agentNumber: string = body.To;
 			const wsUrl = this.configService.get<string>("DOMAIN");
 			const twilioPort = this.configService.get<number>("PORT") || 3001;
 
@@ -29,7 +30,9 @@ export class TwilioController {
 			res.type("xml").send(
 				`<Response>
             <Connect>
-                <Stream url='wss://${wsUrl}/twilio' />
+                <Stream url='wss://${wsUrl}/twilio'>
+					<Parameter name="agentNumber" value="${agentNumber}" />
+				</Stream>
             </Connect>
             </Response>`,
 			);

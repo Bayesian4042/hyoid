@@ -7,6 +7,7 @@ import { TwilioGateway } from "./twilio.gateway";
 import { GroqService } from "src/modules/groq/groq.service";
 import { DeepgramService } from "src/modules/deepgram/deepgram.service";
 import { PrismaService } from "src/prisma/prisma.service";
+import { AgentsService } from "src/agents/agents.service";
 
 @Module({
 	imports: [ConfigModule],
@@ -17,6 +18,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 		GroqService,
 		DeepgramService,
 		PrismaService,
+		AgentsService
 	],
 })
 export class TwilioModule {}

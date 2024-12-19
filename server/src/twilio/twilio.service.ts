@@ -5,6 +5,7 @@ import { WebSocket } from "ws";
 import { EventEmitter } from "events";
 import { GroqService } from "src/modules/groq/groq.service";
 import { PrismaService } from "src/prisma/prisma.service";
+import { AgentsService } from "src/agents/agents.service";
 
 interface Connection {
 	ws: WebSocket;
@@ -25,6 +26,7 @@ export class TwilioService extends EventEmitter implements OnModuleDestroy {
 		private configService: ConfigService,
 		private groqService: GroqService,
 		private prismaService: PrismaService,
+		private agentsService: AgentsService,
 	) {
 		super();
 		// Initialize Deepgram client
@@ -36,6 +38,7 @@ export class TwilioService extends EventEmitter implements OnModuleDestroy {
 	handleConnection(ws: WebSocket): void {
 		console.log("New Twilio WebSocket connection established");
 		let streamSid: string | null = null;
+		let agentId: string | null = null;
 
 		ws.on("message", async (message: string) => {
 			try {
@@ -43,8 +46,16 @@ export class TwilioService extends EventEmitter implements OnModuleDestroy {
 
 				switch (msg.event) {
 					case "start":
-						console.log("Starting Media Stream:", msg.streamSid);
-						streamSid = msg.streamSid;
+						console.log("Starting Media Stream:", msg);
+						console.log("Custom Parameters:", msg.start?.customParameters);
+						const customParameters = msg?.start?.customParameters;
+						if (customParameters) {
+							const agentNumber = customParameters.agentNumber;
+							const agent = await this.agentsService.getAgent(agentNumber);
+							agentId = agent.id;
+						}
+
+						streamSid = msg?.streamSid;
 
 						// Initialize connection state
 						const initialConnection = {
@@ -57,8 +68,8 @@ export class TwilioService extends EventEmitter implements OnModuleDestroy {
 						this.connections.set(streamSid, initialConnection);
 
 						initialConnection.deepgramConnection =
-							this.initializeDeepgram(ws, streamSid);
-						await this.sendWelcomeMessage(ws, streamSid);
+							this.initializeDeepgram(ws, streamSid, agentId);
+						await this.sendWelcomeMessage(ws, streamSid, agentId);
 						break;
 
 					case "media":
@@ -142,7 +153,7 @@ export class TwilioService extends EventEmitter implements OnModuleDestroy {
 	 * @param ws - The WebSocket connection to communicate with the client.
 	 * @param streamSid - The unique identifier for the media stream.
 	 */
-	private initializeDeepgram(ws: WebSocket, streamSid: string): any {
+	private initializeDeepgram(ws: WebSocket, streamSid: string, agentId: string): any {
 		this.logger.log(
 			`Initializing Deepgram connection for streamSid: ${streamSid}`,
 		);
@@ -204,7 +215,7 @@ export class TwilioService extends EventEmitter implements OnModuleDestroy {
 								}
 
 								const messages = [
-									...connection.chatHistory,
+									...connection?.chatHistory,
 									{
 										role: "user",
 										content: transcript,
@@ -212,7 +223,7 @@ export class TwilioService extends EventEmitter implements OnModuleDestroy {
 								];
 
 								const systemPrompt =
-									await this.getSystemPrompt();
+									await this.getSystemPrompt(agentId);
 
 								const response =
 									await this.groqService.generateResponse(
@@ -318,6 +329,7 @@ export class TwilioService extends EventEmitter implements OnModuleDestroy {
 	private async sendWelcomeMessage(
 		ws: WebSocket,
 		streamSid: string,
+		agentId?: string,
 	): Promise<void> {
 		console.log("Sending welcome message:", this.welcomeMessage);
 
@@ -346,9 +358,9 @@ export class TwilioService extends EventEmitter implements OnModuleDestroy {
 		}
 	}
 
-	private async getSystemPrompt(): Promise<string> {
-		const existingAgent = await this.prismaService.agent.findFirst({
-			orderBy: { updatedAt: "desc" },
+	private async getSystemPrompt(agentId: string): Promise<string> {
+		const existingAgent = await this.prismaService.agent.findUnique({
+			where: { id: agentId },
 		});
 
 		if (!existingAgent.systemPrompt) {
