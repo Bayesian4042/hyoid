@@ -57,7 +57,7 @@ export class TwilioService extends EventEmitter implements OnModuleDestroy {
 
 		if (this.voiceService === voiceServiceType.ELEVENLABS) {
 			elevenLabsWs =
-				this.elevenLabsService.createConversatinalAIWebSocketConnection("");
+				this.elevenLabsService.createConversatinalAIWebSocketConnection("12");
 			elevenLabsWs.on("message", (data: any) => {
 				try {
 					const message = JSON.parse(data);
