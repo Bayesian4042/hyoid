@@ -5,7 +5,9 @@ import { PrismaModule } from "./prisma/prisma.module";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { LoggerModule } from "nestjs-pino";
 import { TwilioModule } from "./twilio/twilio.module";
-import { ConnectionsService } from './connections/connections.service';
+import { AgentsService } from "./agents/agents.service";
+import { AgentsController } from "./agents/agents.controller";
+import { PrismaService } from "./prisma/prisma.service";
 
 @Module({
 	imports: [
@@ -33,7 +35,7 @@ import { ConnectionsService } from './connections/connections.service';
 		PrismaModule,
 		ConfigModule.forRoot(),
 	],
-	controllers: [AppController],
-	providers: [AppService, ConnectionsService],
+	controllers: [AppController, AgentsController],
+	providers: [AppService, AgentsService, PrismaService],
 })
 export class AppModule {}
