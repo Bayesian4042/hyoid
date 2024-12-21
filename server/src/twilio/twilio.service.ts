@@ -6,12 +6,19 @@ import { EventEmitter } from "events";
 import { GroqService } from "src/modules/groq/groq.service";
 import { PrismaService } from "src/prisma/prisma.service";
 import { AgentsService } from "src/agents/agents.service";
+import { ElevenLabsService } from "src/modules/elevenlabs/elevenlabs.service";
+import { IncomingMessage } from "http";
 
 interface Connection {
 	ws: WebSocket;
 	chatHistory: any[];
 	currentAudioTimer: NodeJS.Timeout | null;
 	deepgramConnection: any;
+}
+
+enum voiceServiceType {
+	DEEPGRAM = "deepgram",
+	ELEVENLABS = "elevenlabs",
 }
 
 @Injectable()
@@ -21,12 +28,14 @@ export class TwilioService extends EventEmitter implements OnModuleDestroy {
 	private deepgramClient;
 	private welcomeMessage: string =
 		"Hello, how are you today. Can I take your order please.";
+	private voiceService: string = voiceServiceType.ELEVENLABS;
 
 	constructor(
 		private configService: ConfigService,
 		private groqService: GroqService,
 		private prismaService: PrismaService,
 		private agentsService: AgentsService,
+		private elevenLabsService: ElevenLabsService,
 	) {
 		super();
 		// Initialize Deepgram client
@@ -35,69 +44,42 @@ export class TwilioService extends EventEmitter implements OnModuleDestroy {
 		);
 	}
 
-	handleConnection(ws: WebSocket): void {
+	handleConnection(ws: WebSocket, request: IncomingMessage): void {
 		console.log("New Twilio WebSocket connection established");
 		let streamSid: string | null = null;
 		let agentId: string | null = null;
+		let elevenLabsWs = null;
+
+		const url = new URL(request.url, `http://${request.headers.host}`);
+		console.log("URL:", url);
+		const agentNumber = url.searchParams.get('agentNumber');
+		console.log("Agent Number from connection:", agentNumber);
+
+		if (this.voiceService === voiceServiceType.ELEVENLABS) {
+			elevenLabsWs =
+				this.elevenLabsService.createConversatinalAIWebSocketConnection("");
+			elevenLabsWs.on("message", (data: any) => {
+				try {
+					const message = JSON.parse(data);
+					this.elevenLabsService.handleMessage(
+						message,
+						ws,
+						streamSid,
+					);
+				} catch (error) {
+					console.error("[II] Error parsing message:", error);
+				}
+			});
+		}
 
 		ws.on("message", async (message: string) => {
 			try {
 				const msg = JSON.parse(message);
-
-				switch (msg.event) {
-					case "start":
-						console.log("Starting Media Stream:", msg);
-						console.log("Custom Parameters:", msg.start?.customParameters);
-						const customParameters = msg?.start?.customParameters;
-						if (customParameters) {
-							const agentNumber = customParameters.agentNumber;
-							const agent = await this.agentsService.getAgent(agentNumber);
-							agentId = agent.id;
-						}
-
-						streamSid = msg?.streamSid;
-
-						// Initialize connection state
-						const initialConnection = {
-							ws,
-							deepgramConnection: null,
-							chatHistory: [],
-							currentAudioTimer: null,
-						};
-
-						this.connections.set(streamSid, initialConnection);
-
-						initialConnection.deepgramConnection =
-							this.initializeDeepgram(ws, streamSid, agentId);
-						await this.sendWelcomeMessage(ws, streamSid, agentId);
-						break;
-
-					case "media":
-						if (!streamSid) {
-							console.error("No streamSid found for media event");
-							return;
-						}
-
-						const connection = this.connections.get(streamSid);
-						if (connection?.deepgramConnection) {
-							const audio = Buffer.from(
-								msg.media.payload,
-								"base64",
-							);
-							connection.deepgramConnection.send(audio);
-						}
-						break;
-
-					case "stop":
-						console.log("Stopping Media Stream:", msg.streamSid);
-						if (streamSid) {
-							const connection = this.connections.get(streamSid);
-							if (connection?.deepgramConnection) {
-								connection.deepgramConnection.finish();
-							}
-							this.connections.delete(streamSid);
-						}
-						break;
+				if (this.voiceService === voiceServiceType.ELEVENLABS) {
+					streamSid = msg.streamSid;
+					this.handleElevenLabsMessage(msg, streamSid, elevenLabsWs);
+				} else if (this.voiceService === voiceServiceType.DEEPGRAM) {
+					this.handleDeepgramMessage(streamSid, msg, ws, agentId);
 				}
 			} catch (error) {
 				console.error("Error processing message:", error);
@@ -153,7 +135,11 @@ export class TwilioService extends EventEmitter implements OnModuleDestroy {
 	 * @param ws - The WebSocket connection to communicate with the client.
 	 * @param streamSid - The unique identifier for the media stream.
 	 */
-	private initializeDeepgram(ws: WebSocket, streamSid: string, agentId: string): any {
+	private initializeDeepgram(
+		ws: WebSocket,
+		streamSid: string,
+		agentId: string,
+	): any {
 		this.logger.log(
 			`Initializing Deepgram connection for streamSid: ${streamSid}`,
 		);
@@ -326,6 +312,129 @@ export class TwilioService extends EventEmitter implements OnModuleDestroy {
 		}
 	}
 
+	private async handleTwilioMessage(
+		msg: any,
+		clientWs: WebSocket,
+		elevenLabsWs: WebSocket,
+		streamSid: string,
+	): Promise<void> {
+		switch (msg.event) {
+			case "start":
+				streamSid = msg.start.streamSid;
+				this.logger.log(`Stream started with ID: ${streamSid}`);
+				break;
+
+			case "media":
+				if (elevenLabsWs?.readyState === WebSocket.OPEN) {
+					const audioMessage: any = {
+						user_audio_chunk: Buffer.from(
+							msg.media.payload,
+							"base64",
+						).toString("base64"),
+					};
+					elevenLabsWs.send(JSON.stringify(audioMessage));
+				}
+				break;
+
+			case "stop":
+				elevenLabsWs?.close();
+				break;
+
+			default:
+				this.logger.log(`Received unhandled event: ${msg.event}`);
+		}
+	}
+
+	private async handleDeepgramMessage(
+		streamSid: string,
+		msg: any,
+		ws: WebSocket,
+		agentId: string,
+	): Promise<void> {
+		switch (msg.event) {
+			case "start":
+				streamSid = msg?.streamSid;
+
+				// Initialize connection state
+				const initialConnection = {
+					ws,
+					deepgramConnection: null,
+					chatHistory: [],
+					currentAudioTimer: null,
+				};
+
+				this.connections.set(streamSid, initialConnection);
+
+				initialConnection.deepgramConnection = this.initializeDeepgram(
+					ws,
+					streamSid,
+					agentId,
+				);
+				await this.sendWelcomeMessage(ws, streamSid, agentId);
+				break;
+
+			case "media":
+				if (!streamSid) {
+					console.error("No streamSid found for media event");
+					return;
+				}
+
+				const connection = this.connections.get(streamSid);
+				if (connection?.deepgramConnection) {
+					const audio = Buffer.from(msg.media.payload, "base64");
+					connection.deepgramConnection.send(audio);
+				}
+				break;
+
+			case "stop":
+				console.log("Stopping Media Stream:", msg.streamSid);
+				if (streamSid) {
+					const connection = this.connections.get(streamSid);
+					if (connection?.deepgramConnection) {
+						connection.deepgramConnection.finish();
+					}
+					this.connections.delete(streamSid);
+				}
+				break;
+		}
+	}
+
+	private async handleElevenLabsMessage(
+		msg: any,
+		streamSid: string,
+		elevenLabsWs: any,
+	): Promise<void> {
+		try {
+			switch (msg.event) {
+				case "start":
+					console.log(
+						`[Twilio] Stream started with ID: ${streamSid}`,
+					);
+					break;
+				case "media":
+					if (elevenLabsWs?.readyState === WebSocket.OPEN) {
+						// data.media.payload is base64 encoded
+						const audioMessage = {
+							user_audio_chunk: Buffer.from(
+								msg.media.payload,
+								"base64",
+							).toString("base64"),
+						};
+						elevenLabsWs?.send(JSON.stringify(audioMessage));
+					}
+					break;
+				case "stop":
+					elevenLabsWs?.close();
+					break;
+				default:
+					console.log(
+						`[Twilio] Received unhandled event: ${msg.event}`,
+					);
+			}
+		} catch (error) {
+			console.error("[Twilio] Error processing message:", error);
+		}
+	}
 	private async sendWelcomeMessage(
 		ws: WebSocket,
 		streamSid: string,

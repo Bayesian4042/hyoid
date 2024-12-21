@@ -17,7 +17,9 @@ export class AgentsController {
 
 	@Post()
 	@HttpCode(HttpStatus.CREATED)
-	async createAgent(@Body() createAgentDto: { name: string, phoneNumber: string }) {
+	async createAgent(
+		@Body() createAgentDto: { name: string; phoneNumber: string },
+	) {
 		const newAgent = await this.agentsService.create(createAgentDto);
 		return ResponseUtil.success(newAgent);
 	}

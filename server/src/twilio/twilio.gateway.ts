@@ -19,9 +19,9 @@ export class TwilioGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	constructor(private readonly twilioService: TwilioService) {}
 
-	handleConnection(client: any, ...args: any[]) {
+	handleConnection(client: any, request: IncomingMessage) {
 		console.log("Twilio WebSocket client connected:");
-		this.twilioService.handleConnection(client);
+		this.twilioService.handleConnection(client, request);
 	}
 
 	handleDisconnect(client: any) {

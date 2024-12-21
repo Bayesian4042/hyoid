@@ -4,7 +4,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 @Injectable()
 export class AgentsService {
 	constructor(private prismaService: PrismaService) {}
-	async create(createAgentDto: { name: string, phoneNumber: string }) {
+	async create(createAgentDto: { name: string; phoneNumber: string }) {
 		const agent = await this.prismaService.agent.create({
 			data: {
 				name: createAgentDto.name,

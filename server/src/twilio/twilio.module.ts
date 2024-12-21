@@ -8,6 +8,7 @@ import { GroqService } from "src/modules/groq/groq.service";
 import { DeepgramService } from "src/modules/deepgram/deepgram.service";
 import { PrismaService } from "src/prisma/prisma.service";
 import { AgentsService } from "src/agents/agents.service";
+import { ElevenLabsService } from "src/modules/elevenlabs/elevenlabs.service";
 
 @Module({
 	imports: [ConfigModule],
@@ -18,7 +19,8 @@ import { AgentsService } from "src/agents/agents.service";
 		GroqService,
 		DeepgramService,
 		PrismaService,
-		AgentsService
+		AgentsService,
+		ElevenLabsService,
 	],
 })
 export class TwilioModule {}
