@@ -2,14 +2,12 @@
 import { Body, Controller, Get, Logger, Post, Req, Res } from "@nestjs/common";
 import { Response } from "express";
 import { ConfigService } from "@nestjs/config";
-import { TwilioService } from "./twilio.service";
 
 @Controller("conversations")
-export class TwilioController {
-	private logger = new Logger(TwilioController.name);
+export class VoiceConversationController {
+	private logger = new Logger(VoiceConversationController.name);
 	constructor(
 		private readonly configService: ConfigService,
-		private readonly twilioService: TwilioService,
 	) {}
 
 	@Get("/")
@@ -17,7 +15,7 @@ export class TwilioController {
 		res.type("text").send("Twilio media stream transcriber");
 	}
 
-	@Post("/incoming-call")
+	@Get("/incoming-call")
 	async handleTwilioStream(@Body() body: any, @Res() res: Response) {
 		try {
 			console.log("Incoming call from Twilio", body);

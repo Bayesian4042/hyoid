@@ -22,8 +22,8 @@ enum voiceServiceType {
 }
 
 @Injectable()
-export class TwilioService extends EventEmitter implements OnModuleDestroy {
-	private logger = new Logger(TwilioService.name);
+export class VoiceConversationService extends EventEmitter implements OnModuleDestroy {
+	private logger = new Logger(VoiceConversationService.name);
 	private connections: Map<string, Connection> = new Map();
 	private deepgramClient;
 	private welcomeMessage: string =
@@ -38,66 +38,78 @@ export class TwilioService extends EventEmitter implements OnModuleDestroy {
 		private elevenLabsService: ElevenLabsService,
 	) {
 		super();
-		// Initialize Deepgram client
 		this.deepgramClient = createClient(
 			this.configService.get<string>("DEEPGRAM_API_KEY"),
 		);
 	}
 
 	handleConnection(ws: WebSocket, request: IncomingMessage): void {
-		console.log("New Twilio WebSocket connection established");
+		this.logger.log("New Twilio WebSocket connection established");
 		let streamSid: string | null = null;
 		let agentId: string | null = null;
+		let callerId: string | null = null;
 		let elevenLabsWs = null;
-
-		const url = new URL(request.url, `http://${request.headers.host}`);
-		console.log("URL:", url);
-		const agentNumber = url.searchParams.get('agentNumber');
-		console.log("Agent Number from connection:", agentNumber);
-
-		if (this.voiceService === voiceServiceType.ELEVENLABS) {
-			elevenLabsWs =
-				this.elevenLabsService.createConversatinalAIWebSocketConnection("12");
-			elevenLabsWs.on("message", (data: any) => {
-				try {
-					const message = JSON.parse(data);
-					this.elevenLabsService.handleMessage(
-						message,
-						ws,
-						streamSid,
-					);
-				} catch (error) {
-					console.error("[II] Error parsing message:", error);
-				}
-			});
-		}
-
+		let workspaceId: string | null = null;
+	
 		ws.on("message", async (message: string) => {
-			try {
-				const msg = JSON.parse(message);
-				if (this.voiceService === voiceServiceType.ELEVENLABS) {
-					streamSid = msg.streamSid;
-					this.handleElevenLabsMessage(msg, streamSid, elevenLabsWs);
-				} else if (this.voiceService === voiceServiceType.DEEPGRAM) {
-					this.handleDeepgramMessage(streamSid, msg, ws, agentId);
-				}
-			} catch (error) {
-				console.error("Error processing message:", error);
+		  try {
+			const msg = JSON.parse(message);
+	
+			if (msg.event === "start") {
+			  console.log("Received start event:", msg.start);
+			  const agentNumber = msg.start?.customParameters?.agentNumber;
+			  callerId = msg.start?.customParameters?.callerId;
+			  const agent = await this.agentsService.getAgent(agentNumber);
+			  agentId = agent.id;
+	
+			  if (this.voiceService === voiceServiceType.ELEVENLABS) {
+				elevenLabsWs =
+				  this.elevenLabsService.createConversatinalAIWebSocketConnection(
+				   agentId
+				  );
+				elevenLabsWs.on("message", (data: any) => {
+				  try {
+					const message = JSON.parse(data);
+					this.elevenLabsService.handleMessage(message, ws, streamSid);
+				  } catch (error) {
+					console.error("[II] Error parsing message:", error);
+				  }
+				});
+			  }
 			}
+	
+			if (this.voiceService === voiceServiceType.ELEVENLABS) {
+			  streamSid = msg.streamSid;
+			  this.handleElevenLabsMessage(msg, streamSid, elevenLabsWs);
+			} else if (this.voiceService === voiceServiceType.DEEPGRAM) {
+			  this.handleDeepgramMessage(streamSid, msg, ws, agentId);
+			}
+		  } catch (error) {
+			console.error("Error processing message:", error);
+		  }
 		});
-
-		ws.on("close", () => {
-			console.log(
-				"WebSocket connection closed for streamSid:",
-				streamSid,
-			);
+	
+		ws.on("close", async () => {
+		  console.log("WebSocket connection closed for streamSid:", streamSid);
+	
+		  if (this.voiceService === voiceServiceType.ELEVENLABS) {
+			const transcript = '';
+			//   this.elevenLabsService.getConversationHistory(streamSid);
+			// this.conversationService.saveDentalCallRecord(
+			//   callerId,
+			//   workspaceId,
+			//   transcript,
+			// );
+			// this.elevenLabsService.cleanupConversation(streamSid);
+		  } else if (this.voiceService === voiceServiceType.DEEPGRAM) {
 			if (streamSid) {
-				const connection = this.connections.get(streamSid);
-				if (connection?.deepgramConnection) {
-					connection.deepgramConnection.finish();
-				}
-				this.connections.delete(streamSid);
+			  const connection = this.connections.get(streamSid);
+			  if (connection?.deepgramConnection) {
+				connection.deepgramConnection.finish();
+			  }
+			  this.connections.delete(streamSid);
 			}
+		  }
 		});
 	}
 

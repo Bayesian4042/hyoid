@@ -1,4 +1,7 @@
 {
+  "dependencies": {
+    "@nestjs/mapped-types": "*"
+  },
 	"name": "murb",
 	"version": "1.0.0",
 	"main": "index.js",

@@ -5,27 +5,31 @@ import {
 	OnGatewayConnection,
 	OnGatewayDisconnect,
 	WebSocketServer,
+    SubscribeMessage,
+    MessageBody,
 } from "@nestjs/websockets";
-import { TwilioService } from "./twilio.service";
 import { Server } from "ws";
 import { IncomingMessage } from "http";
+import { TextConversationService } from "./text-conversation.service";
 
 @WebSocketGateway({
-	path: "/twilio",
+    path: '/test'
 })
-export class TwilioGateway implements OnGatewayConnection, OnGatewayDisconnect {
-	@WebSocketServer()
+export class TextConversationGateway {
+
+
+    @WebSocketServer()
 	server: Server;
 
-	constructor(private readonly twilioService: TwilioService) {}
+	constructor(private readonly voiceConversationService: TextConversationService) {}
 
 	handleConnection(client: any, request: IncomingMessage) {
 		console.log("Twilio WebSocket client connected:");
-		this.twilioService.handleConnection(client, request);
+		this.voiceConversationService.handleConnection(client, "123");
 	}
 
 	handleDisconnect(client: any) {
 		console.log("Twilio WebSocket client disconnected:");
-		this.twilioService.handleDisconnect(client);
+		// this.voiceConversationService.handleDisconnect(client);
 	}
 }

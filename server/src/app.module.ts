@@ -4,10 +4,12 @@ import { AppService } from "./app.service";
 import { PrismaModule } from "./prisma/prisma.module";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { LoggerModule } from "nestjs-pino";
-import { TwilioModule } from "./twilio/twilio.module";
+import { TwilioModule } from "./voice-conversation/voice-conversation.module";
 import { AgentsService } from "./agents/agents.service";
 import { AgentsController } from "./agents/agents.controller";
 import { PrismaService } from "./prisma/prisma.service";
+import { TextConversationModule } from './text-conversation/text-conversation.module';
+import { RagModule } from './rag/rag.module';
 
 @Module({
 	imports: [
@@ -34,6 +36,8 @@ import { PrismaService } from "./prisma/prisma.service";
 		}),
 		PrismaModule,
 		ConfigModule.forRoot(),
+		TextConversationModule,
+		RagModule,
 	],
 	controllers: [AppController, AgentsController],
 	providers: [AppService, AgentsService, PrismaService],
