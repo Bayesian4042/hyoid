@@ -22,3 +22,14 @@ This is an end to end worflow for voice agent -> speech to text[deepgram] and te
 2. Go to Active number
 3. Click on configure
 4. Add voice webhook with api https://{domain}/conversations/incoming-call
+
+# ChatBots
+1. To reflect the longer conversation history:
+    ```
+    [
+        {"role": "system", "content": "system message here"},
+        {"role": "user", "content": "first user prompt here"},
+        {"role": "assitant", "content": "the assitant response"},
+        {"role": "user", "content": "the new user prompt"}
+    ]
+    ```
