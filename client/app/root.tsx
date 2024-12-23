@@ -9,7 +9,7 @@ import type { LinksFunction } from "@remix-run/node";
 
 import "./tailwind.css";
 import React from "react";
-import Sidebar from "./components/Sidebar/Sidebar";
+import Sidebar from "./components/Sidebar";
 import { Flex } from "antd";
 
 export const links: LinksFunction = () => [
@@ -44,8 +44,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Flex>
+  return (<Flex>
+    <div className="flex-[0.188]">
     <Sidebar/>
+    </div>
+    <div className="flex-[0.82]">
     <Outlet />
-  </Flex> 
+    </div>
+  </Flex>) 
 }

@@ -7,7 +7,7 @@ import { BiChat } from "react-icons/bi";
 import { ReactNode } from "react";
 export default function Sidebar() {
     return (
-        <div className="flex-[0.188] px-3 py-3 border-r-[1px] h-screen flex flex-col justify-between">
+        <div className="px-3 py-3 border-r-[1px] h-screen flex flex-col justify-between">
             <div>
                 <h1 className="text-lg font-semibold">VOICE-WORKLOW</h1>
                 <div className="mt-5">
