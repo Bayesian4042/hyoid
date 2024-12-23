@@ -1,10 +1,11 @@
-import { Button, Flex, Space } from "antd";
+import { Badge, Button, Flex, Space } from "antd";
 import { IoNotificationsOutline } from "react-icons/io5";
 import { MdOutlineChat } from "react-icons/md";
 import { FaChevronDown } from "react-icons/fa6";
 import { RiUserVoiceLine } from "react-icons/ri";
 import { BiChat } from "react-icons/bi";
 import { ReactNode } from "react";
+import { Link } from "@remix-run/react";
 export default function Sidebar() {
     return (
         <div className="px-3 py-3 border-r-[1px] h-screen flex flex-col justify-between">
@@ -13,14 +14,20 @@ export default function Sidebar() {
                 <div className="mt-5">
                     <NavTitle title="CREATE" />
                     <Space size={1} direction="vertical" className="w-full">
+                        <Link to="/">
                         <NavButton icon={<RiUserVoiceLine size={20} />} title="Voice Agent" />
+                        </Link>
+                        <Link to="/chatagent">
                         <NavButton icon={<MdOutlineChat size={20} />} title="Chat Agent" />
+                        </Link>
                     </Space>
                 </div>
                 <div className="mt-5">
                     <NavTitle title="History" />
                     <Space size={1} direction="vertical" className="w-full">
+                        <Link to='/conversations'>
                         <NavButton icon={<BiChat size={20} />} title="Conversations" />
+                        </Link>
                     </Space>
                 </div>
             </div>
@@ -28,7 +35,12 @@ export default function Sidebar() {
                 <div className="flex justify-center mb-8">
                     <FaChevronDown size={10} />
                 </div>
-                <NavButton icon={<IoNotificationsOutline size={20} />} title="Notifications" />
+
+                <NavButton icon={
+                    <Badge dot>
+                        <IoNotificationsOutline size={20} />
+                    </Badge>
+                } title="Notifications" />
                 <UserCard />
             </div>
         </div>
