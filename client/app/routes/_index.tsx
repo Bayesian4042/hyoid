@@ -9,6 +9,6 @@ export const meta: MetaFunction = () => {
 
 export default function Index() {
   return (
-    <div className="text-2xl font-semibold">Welcome</div>
+    <div className="px-3">Welcome</div>
   );
 }
