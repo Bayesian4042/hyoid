@@ -11,7 +11,7 @@ const AddAgentDrawer = ({setOpen,open,title}:any) => {
     </div>
     <Flex justify='flex-end'>
 
-    <Button className='w-fit'>Crete Agent</Button>
+    <Button className='w-fit'>Create Agent</Button>
     </Flex>
   </Flex>
         </Drawer>
