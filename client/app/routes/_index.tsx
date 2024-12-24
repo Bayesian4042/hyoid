@@ -1,9 +1,10 @@
 import type { MetaFunction } from "@remix-run/node";
 import { Flex } from "antd";
-import SelectAgent from "~/components/SelectAgent";
-import HeaderWithAgent from "~/components/HeaderWithAgent";
+import HeaderWithAgent from "~/components/layouts/header/HeaderWithAgent";
 import { useState } from "react";
-import AddAgentDrawer from "~/components/AddAgentDrawer";
+import AddAgentDrawer from "~/components/layouts/drawer/AddAgentDrawer";
+import ConfigureAgent from "~/components/layouts/agent/ConfigureAgent";
+import SelectAgent from "~/components/layouts/agent/SelectAgent";
 
 export const meta: MetaFunction = () => {
   return [
@@ -20,7 +21,8 @@ export default function Index() {
         <HeaderWithAgent title='Voice Agent' buttons={["add", 'playground']} />
       </div>
       <div className="flex-[0.65]">
-        <SelectAgent setOpen={setOpen}/>
+      <ConfigureAgent/>
+      {/* <SelectAgent/> */}
       </div>
       <AddAgentDrawer setOpen={setOpen} open={open} title="Voice"/>
     </Flex>

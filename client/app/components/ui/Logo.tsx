@@ -1,11 +1,11 @@
 import { LuBot } from "react-icons/lu"
 
-const AgentLogo = ({size}:{size:number}) => {
+const Logo = ({logo}:any) => {
   return (
     <div className="border-[1px] rounded-lg p-2">
-    <LuBot size={size}/>
+    {logo}
 </div>
   )
 }
 
-export default AgentLogo
+export default Logo

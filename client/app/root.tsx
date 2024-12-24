@@ -9,7 +9,7 @@ import type { LinksFunction } from "@remix-run/node";
 
 import "./tailwind.css";
 import React from "react";
-import Sidebar from "./components/Sidebar";
+import Sidebar from "./components/layouts/sidebar/Sidebar";
 import { Flex } from "antd";
 
 export const links: LinksFunction = () => [

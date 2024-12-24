@@ -15,10 +15,10 @@ export default function Sidebar() {
                     <NavTitle title="CREATE" />
                     <Space size={1} direction="vertical" className="w-full">
                         <Link to="/">
-                        <NavButton icon={<RiUserVoiceLine size={20} />} title="Voice Agent" />
+                            <NavButton icon={<RiUserVoiceLine size={20} />} title="Voice Agent" />
                         </Link>
                         <Link to="/chatagent">
-                        <NavButton icon={<MdOutlineChat size={20} />} title="Chat Agent" />
+                            <NavButton icon={<MdOutlineChat size={20} />} title="Chat Agent" />
                         </Link>
                     </Space>
                 </div>
@@ -26,7 +26,7 @@ export default function Sidebar() {
                     <NavTitle title="History" />
                     <Space size={1} direction="vertical" className="w-full">
                         <Link to='/conversations'>
-                        <NavButton icon={<BiChat size={20} />} title="Conversations" />
+                            <NavButton icon={<BiChat size={20} />} title="Conversations" />
                         </Link>
                     </Space>
                 </div>
@@ -49,7 +49,7 @@ export default function Sidebar() {
 
 const NavTitle = ({ title }: { title: string }) => {
     return (
-        <h6 className="text-xs font-semibold text-gray-400 my-2">{title}</h6>
+        <h6 className="text-xs font-semibold text-gray-500 my-2">{title}</h6>
     )
 }
 

@@ -1,5 +1,5 @@
 import Header from './Header'
-import AllAgents from './AllAgents'
+import AllAgents from '../agent/AllAgents'
 
 const HeaderWithAgent = ({ title, buttons }: any) => {
     return (

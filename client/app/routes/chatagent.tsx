@@ -1,8 +1,8 @@
 import { Flex } from "antd";
 import { useState } from "react";
-import AddAgentDrawer from "~/components/AddAgentDrawer";
-import HeaderWithAgent from "~/components/HeaderWithAgent";
-import SelectAgent from "~/components/SelectAgent";
+import AddAgentDrawer from "~/components/layouts/drawer/AddAgentDrawer";
+import SelectAgent from "~/components/layouts/agent/SelectAgent";
+import HeaderWithAgent from "~/components/layouts/header/HeaderWithAgent";
 
 
 export default function ChatAgent() {
