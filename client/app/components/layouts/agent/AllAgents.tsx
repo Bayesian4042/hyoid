@@ -16,7 +16,7 @@ export default function AllAgents() {
 
 
 const AgentLink = ({ title }: { title: string }) => {
-  return (<Flex justify='space-between' align='center' className='rounded-lg hover:bg-gray-50 p-3'>
+  return (<Flex justify='space-between' align='center' className='rounded-lg hover:bg-gray-50 p-3 cursor-pointer'>
     <Flex gap='small' align='center'>
       <div className='bg-gray-100 p-3  rounded-lg'>
         <LuBot size={20} />
