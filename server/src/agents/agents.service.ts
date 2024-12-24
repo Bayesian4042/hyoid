@@ -1,15 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
+import { AgentType } from "@prisma/client";
 
 @Injectable()
 export class AgentsService {
 	constructor(private prismaService: PrismaService) {}
-	async create(createAgentDto: { name: string; phoneNumber: string }) {
+	async create(createAgentDto: { name: string; type: AgentType }) {
 		const agent = await this.prismaService.agent.create({
 			data: {
 				name: createAgentDto.name,
-				systemPrompt: "You are a helpful AI assistant.",
-				phoneNumber: createAgentDto.phoneNumber,
+				type: createAgentDto.type
 			},
 		});
 		return agent;
@@ -22,9 +22,13 @@ export class AgentsService {
 		});
 	}
 
-	async getAgent(phoneNumber: string) {
+	async getAgent(id: string) {
 		return this.prismaService.agent.findUnique({
-			where: { phoneNumber },
+			where: { id },
 		});
+	}
+
+	async getAllAgents(type:AgentType){
+		return this.prismaService.agent.findMany({where:{type}})
 	}
 }
