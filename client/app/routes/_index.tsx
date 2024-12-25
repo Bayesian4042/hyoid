@@ -1,11 +1,12 @@
 import type { MetaFunction } from "@remix-run/node";
 import { Flex } from "antd";
 import HeaderWithAgent from "~/components/layouts/header/HeaderWithAgent";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AddAgentDrawer from "~/components/layouts/drawer/AddAgentDrawer";
 import ConfigureAgent from "~/components/layouts/agent/ConfigureAgent";
 import SelectAgent from "~/components/layouts/agent/SelectAgent";
 import { getAllAgents } from "~/common/apis/api.request";
+import { useLoaderData } from "@remix-run/react";
 
 export const meta: MetaFunction = () => {
   return [
@@ -19,10 +20,17 @@ export const meta: MetaFunction = () => {
 
 export default function Index() {
   const[open,setOpen] = useState<boolean>(false)
-  const[agentData,setAgentData] = useState<any[]>([])
   const [agentId, setAgentId] = useState<string | null>(null);
-
-  console.log(agentId)
+  const [agents,setAgents] = useState()
+  const allagents = useLoaderData()  
+  
+  
+  
+  useEffect(() => {
+    if (allagents) {
+      setAgents(allagents); 
+    }
+  }, [allagents]);
 
   const buttons = [
     { 
@@ -37,16 +45,16 @@ export default function Index() {
   return (
     <Flex >
       <div className="flex-[0.35]">
-        <HeaderWithAgent title='Voice Agent' buttons={buttons} setAgentId={setAgentId}  />
+        <HeaderWithAgent title='Voice Agent' buttons={buttons} setAgentId={setAgentId} agents={agents} />
       </div>
       <div className="flex-[0.65]">
         {
-        agentData.length ?
-      <ConfigureAgent/> :
+        agentId ?
+      <ConfigureAgent agentId={agentId}/> :
       <SelectAgent setOpen={setOpen}/>
         }
       </div>
-      <AddAgentDrawer setOpen={setOpen} open={open} title="Voice"/>
+      <AddAgentDrawer setAgents={setAgents} setOpen={setOpen} open={open} title="Voice"/>
     </Flex>
   );
 }

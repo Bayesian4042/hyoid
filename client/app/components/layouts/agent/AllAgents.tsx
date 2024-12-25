@@ -6,12 +6,12 @@ import { useLoaderData } from '@remix-run/react';
 
 interface AllAgentsProps {
   setAgentId: (id: string) => void;
+  agents:any
 }
 
-export default  function AllAgents(setAgentId:AllAgentsProps) {
-    const agents = useLoaderData<any[]>()
+export default  function AllAgents({setAgentId,agents}:AllAgentsProps) {
   return (
-    <div className='p-4'>
+    <div className='p-4 h-[calc(100vh-64px)] overflow-y-scroll'>
       {
         agents?.map((agent:any) => (
           <div onClick={() => setAgentId(agent.id)} key={agent.id}>

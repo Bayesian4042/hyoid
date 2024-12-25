@@ -2,16 +2,19 @@ import { Button, Drawer, Flex, Input,Typography } from 'antd'
 import Logo from '~/components/ui/Logo'
 import { LuBot } from "react-icons/lu"
 import { useState } from 'react'
-import { createAgent } from '~/common/apis/api.request'
+import { createAgent, getAllAgents } from '~/common/apis/api.request'
 import { useLocation } from "@remix-run/react";
 
-const AddAgentDrawer = ({setOpen,open,title}:any) => {
+const AddAgentDrawer = ({setOpen,open,title,setAgents}:any) => {
   const[agentName,setAgentName] = useState("");
 
   const {pathname} = useLocation()
 
   const handleCreate = async() => {
-      await createAgent(agentName,pathname === "/" ? "voice" : "chat");
+     await createAgent(agentName,pathname === "/" ? "voice" : "chat");
+     const data = await getAllAgents(pathname === "/" ? "voice" : "chat");
+     console.log(data)
+     setAgents(data)
       setOpen(false);
   }
   return (

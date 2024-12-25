@@ -1,22 +1,51 @@
-import { Button, Flex, Space, Typography } from "antd"
-import { useState } from "react";
+import { Button, Flex, Space, Spin, Typography } from "antd"
+import { useEffect, useState } from "react";
 import { FiLink } from "react-icons/fi";
 import { SlOptions } from "react-icons/sl";
 import VoiceOptions from "./voiceagent/VoiceOptions";
 import AgentOptions from "./voiceagent/AgentOptions";
+import { LoadingOutlined } from '@ant-design/icons';
+import { getAgent } from "~/common/apis/api.request";
 
-const ConfigureAgent = () => {
+const ConfigureAgent = ({agentId}:any) => {
   const [options, setOptions] = useState<string[]>(["Agent", "Voice"]);
   const [selectedOption, setSelectedOption] = useState<string>("Agent");
+  const [loading,setLoading] = useState<boolean>(true)
+  const [agentData,setAgentData]= useState<any[]>([]);
+
+  const fetchData = async() => {
+    setLoading(true);
+    const response = await getAgent(agentId);
+    if(response)
+    {
+      setAgentData(response);
+    }
+    setLoading(false);
+
+  }
+
+ 
+
+
+
+  useEffect(()=>{
+    fetchData();
+  },[agentId])
+
+
   return (
-    <div className="border-l-[1px] h-screen px-3 py-4 overflow-y-scroll">
+    <>
+        {loading ? <Flex className="h-screen border-l-[1px]" justify="center" align="center">
+      <Spin indicator={<LoadingOutlined spin />}size="large"/>
+      </Flex> : 
+    <div className="relative border-l-[1px] h-screen px-3 py-4 overflow-y-scroll">
       <Flex justify="space-between" className="px-1">
         <div>
           <h1 className="font-semibold">
-            Agent Name
+           {agentData?.name}
           </h1>
           <h6 className="text-gray-500">
-            asdf1234
+            {agentData?.id}
           </h6>
         </div>
         <Space>
@@ -42,10 +71,13 @@ const ConfigureAgent = () => {
       </Space>
 
       {
-        selectedOption === 'Voice' ? <VoiceOptions /> : <AgentOptions/>
+        selectedOption === 'Voice' ? <VoiceOptions /> : <AgentOptions agentData={agentData}/>
       }
 
     </div>
+    }
+    </>
+
   )
 }
 
