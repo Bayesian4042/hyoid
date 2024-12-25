@@ -11,7 +11,7 @@ import {
 } from "@nestjs/common";
 import { AgentsService } from "./agents.service";
 import { ResponseUtil } from "src/common/utils/response.util";
-import { AgentType,LLMType } from "@prisma/client";
+import { CreateAgentDto,AgentType, UpdateAgentDto } from "./agents.dto";
 
 @Controller("agents")
 export class AgentsController {
@@ -20,7 +20,7 @@ export class AgentsController {
 	@Post()
 	@HttpCode(HttpStatus.CREATED)
 	async createAgent(
-		@Body() createAgentDto: { name: string; type: AgentType },
+		@Body() createAgentDto:CreateAgentDto,
 	) {
 		if (!["chat", "voice"].includes(createAgentDto.type)) {
 			return ResponseUtil.error(
@@ -45,7 +45,7 @@ export class AgentsController {
 	@HttpCode(HttpStatus.OK)
 	async updateAgent(
 		@Param("id") id: string,
-		@Body() updateAgentDto: { systemPrompt?: string,firstMessage?:string,temperature?:string,name?:string,llm?:LLMType},
+		@Body() updateAgentDto: UpdateAgentDto,
 	) {
 		if(!updateAgentDto) {
 			return ResponseUtil.error("Please Provide valid id",403,"Valid id not provided.")
