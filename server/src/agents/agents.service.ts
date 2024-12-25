@@ -1,30 +1,34 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
+import { AgentType, CreateAgentDto, UpdateAgentDto } from "./agents.dto";
 
 @Injectable()
 export class AgentsService {
 	constructor(private prismaService: PrismaService) {}
-	async create(createAgentDto: { name: string; phoneNumber: string }) {
+	async create(createAgentDto: CreateAgentDto) {
 		const agent = await this.prismaService.agent.create({
 			data: {
 				name: createAgentDto.name,
-				systemPrompt: "You are a helpful AI assistant.",
-				phoneNumber: createAgentDto.phoneNumber,
+				type: createAgentDto.type
 			},
 		});
 		return agent;
 	}
 
-	async update(id: string, updateAgentDto: { systemPrompt?: string }) {
+	async update(id: string, updateAgentDto: UpdateAgentDto) {
 		return this.prismaService.agent.update({
 			where: { id },
 			data: updateAgentDto,
 		});
 	}
 
-	async getAgent(phoneNumber: string) {
+	async getAgent(id: string) {
 		return this.prismaService.agent.findUnique({
-			where: { phoneNumber },
+			where: { id },
 		});
+	}
+
+	async getAllAgents(type:AgentType){
+		return this.prismaService.agent.findMany({where:{type}})
 	}
 }

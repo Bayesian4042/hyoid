@@ -6,9 +6,9 @@ const Header = ({title,buttons}:any) => {
     <div className='h-16 border-b-[1px] flex justify-between items-center  px-7'>
       <h1 className='font-semibold text-lg'>{title}</h1>
       <Space>
-        {buttons?.map((data:ReactNode|string,idx:any)=> (
-        <Button key={idx}>
-        {data}
+        {buttons?.map((button:any,idx:any)=> (
+        <Button key={idx} onClick={button.action}>
+        {button.title}
         </Button>
         ))}
         </Space>
