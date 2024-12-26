@@ -5,14 +5,16 @@ import SelectAgent from "~/components/layouts/agent/SelectAgent";
 import HeaderWithAgent from "~/components/layouts/header/HeaderWithAgent";
 import { getAllAgents } from "~/common/apis/api.request";
 import { useLoaderData } from "@remix-run/react";
+import { Agent } from "~/types/agents";
+import ConfigureAgent from "~/components/layouts/agent/ConfigureAgent";
 
 
 export default function ChatAgent() {
   const[open,setOpen] = useState<boolean>(false)
 
   const [agentId, setAgentId] = useState<string | null>(null);
-  const [agents,setAgents] = useState()
-  const allagents = useLoaderData()  
+  const [agents,setAgents] = useState<Agent[]>()
+  const allagents = useLoaderData<Agent[]>()  
     
     
     
@@ -37,7 +39,10 @@ export default function ChatAgent() {
         <HeaderWithAgent title='Chat Agents' buttons={buttons} setAgentId={setAgentId} agents={agents} />
       </div>
       <div className="flex-[0.65]">
+        {
+          agentId ? <ConfigureAgent agentId={agentId}/> :
         <SelectAgent setOpen={setOpen}/>
+        }
       </div>
     <AddAgentDrawer setAgents={setAgents} open={open} setOpen={setOpen} title="Chat"/>
     </Flex>

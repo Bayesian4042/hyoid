@@ -7,6 +7,7 @@ import ConfigureAgent from "~/components/layouts/agent/ConfigureAgent";
 import SelectAgent from "~/components/layouts/agent/SelectAgent";
 import { getAllAgents } from "~/common/apis/api.request";
 import { useLoaderData } from "@remix-run/react";
+import { Agent } from "~/types/agents";
 
 export const meta: MetaFunction = () => {
   return [
@@ -21,10 +22,9 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   const[open,setOpen] = useState<boolean>(false)
   const [agentId, setAgentId] = useState<string | null>(null);
-  const [agents,setAgents] = useState()
-  const allagents = useLoaderData()  
-  
-  
+  const [agents,setAgents] = useState<Agent[]>()
+  const allagents = useLoaderData<Agent[]>()  
+    
   
   useEffect(() => {
     if (allagents) {
@@ -42,6 +42,7 @@ export default function Index() {
       action: () => setOpen(true)
     }
   ];
+
   return (
     <Flex >
       <div className="flex-[0.35]">

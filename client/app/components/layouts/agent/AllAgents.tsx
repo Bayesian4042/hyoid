@@ -1,13 +1,9 @@
 import { Flex } from 'antd';
 import { LuBot } from "react-icons/lu";
 import { SlOptions } from "react-icons/sl";
-import { useLoaderData } from '@remix-run/react';
+import { AllAgentsProps } from '~/types/common';
 
 
-interface AllAgentsProps {
-  setAgentId: (id: string) => void;
-  agents:any
-}
 
 export default  function AllAgents({setAgentId,agents}:AllAgentsProps) {
   return (

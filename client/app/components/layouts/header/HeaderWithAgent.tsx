@@ -1,15 +1,11 @@
 import Header from './Header'
 import AllAgents from '../agent/AllAgents'
 import {Fragment} from 'react';
+import { HeaderWithAgentProps } from '~/types/common';
 
-interface HeaderWithAgentProps {
-    title: string;
-    buttons: { title: string; action: () => void }[];
-    setAgentId: (id: string) => void; 
-    agents:any
-  }
 
-const HeaderWithAgent = ({ title, buttons,setAgentId,agents }: HeaderWithAgentProps) => {
+
+const HeaderWithAgent:React.FC<HeaderWithAgentProps> = ({ title, buttons,setAgentId,agents }) => {
     return (
         <Fragment>
             <Header title={title} buttons={buttons} />

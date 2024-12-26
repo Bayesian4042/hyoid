@@ -8,7 +8,7 @@ export class TextConversationController {
   @Get('chat')
   async startChat() {
     try {
-      const wsEndpoint = `wss://${process.env.DOMAIN}/conversations/text`;
+      const wsEndpoint = `ws://localhost:8000/test`;
       return {
         status: 'success',
         message: 'Chat session initiated',

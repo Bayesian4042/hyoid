@@ -1,0 +1,55 @@
+import { Agent } from "./agents";
+
+interface ButtonProps {
+    title: string; 
+    action: () => void 
+}
+
+interface HeaderWithAgentProps {
+    title: string;
+    buttons: ButtonProps[];
+    setAgentId: (id: string) => void; 
+    agents:Agent[] | undefined;
+  }
+
+
+interface HeaderProps {
+    title:string,
+    buttons:ButtonProps[]
+}
+
+
+interface AllAgentsProps {
+    setAgentId: (id: string) => void;
+    agents:Agent[] | undefined
+  }
+
+
+  interface Flag {
+    firstMessage:string,
+    systemPrompt:string,
+    temperature:number
+}
+
+interface InputFieldProps {
+  title : string,
+  desc : string,
+  row : number,
+  value:string,
+  setValue:(firstMessage: string) => void; 
+}
+
+
+interface OpenModalButtonProps{
+  title:string,
+  desc:string,
+  button:any,
+  setOpen :(isOpenKnowledgeBase: boolean) => void; 
+}
+
+interface OptionSelectorProps {
+  title :string, 
+  desc:string,
+  options?:{ value: string, label: string }[],
+  defaultValue:string
+}
