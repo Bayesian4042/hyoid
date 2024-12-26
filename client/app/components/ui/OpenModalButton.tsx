@@ -1,6 +1,8 @@
 import { Button, Flex } from "antd"
+import React from "react"
+import { OpenModalButtonProps } from "~/types/common"
 
-const OpenModalButton = ({title,desc,button,setOpen}:any) => {
+const OpenModalButton:React.FC<OpenModalButtonProps> = ({title,desc,button,setOpen}) => {
   return (
     <Flex justify="space-between" align="center" className='border-[1px] py-5 rounded-2xl px-9 bg-gray-50'>
         <div className='w-[410px]'>

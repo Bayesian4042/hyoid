@@ -5,17 +5,14 @@ import OptionSelector from '~/components/ui/OptionSelector'
 import Slider from '~/components/ui/Slider'
 import KnowledgeBaseDrawer from '../../drawer/KnowledgeBaseDrawer'
 import ToolsDrawer from '../../drawer/ToolsDrawer'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { updateAgent } from '~/common/apis/api.request'
 import { IoWarningOutline } from "react-icons/io5";
+import { Agent } from '~/types/agents'
 
-interface Flag {
-    firstMessage:string,
-    systemPrompt:string,
-    temperature:number
-}
+import { Flag } from '~/types/common'
 
-const AgentOptions = ({agentData}:any) => {
+const AgentOptions = ({agentData}:{agentData:Agent}) => {
 
 
     const[isOpenKnowledgeBase,setIsOpenKnowledgeBase] = useState<boolean>(false)

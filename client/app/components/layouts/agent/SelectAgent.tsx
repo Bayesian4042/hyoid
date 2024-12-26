@@ -2,7 +2,7 @@ import { Button, Flex } from "antd"
 import Logo from "~/components/ui/Logo"
 import { LuBot } from "react-icons/lu"
 
-const SelectAgent = ({setOpen}:any) => {
+const SelectAgent = ({setOpen}:{setOpen : (isOpenKnowledgeBase: boolean) => void} ) => {
   return (
     <Flex className="border-l-[1px] h-screen" justify="center" align="center" vertical>
             <Logo logo={<LuBot size={27}/>}/>

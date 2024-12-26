@@ -1,7 +1,8 @@
 import { Button, Space } from 'antd'
-import React, { ReactNode } from 'react'
+import React from 'react'
+import { HeaderProps } from '~/types/common'
 
-const Header = ({title,buttons}:any) => {
+const Header:React.FC<HeaderProps> = ({title,buttons}) => {
   return (
     <div className='h-16 border-b-[1px] flex justify-between items-center  px-7'>
       <h1 className='font-semibold text-lg'>{title}</h1>

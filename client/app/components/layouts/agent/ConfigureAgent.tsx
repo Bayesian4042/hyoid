@@ -1,17 +1,18 @@
 import { Button, Flex, Space, Spin, Typography } from "antd"
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { FiLink } from "react-icons/fi";
 import { SlOptions } from "react-icons/sl";
 import VoiceOptions from "./voiceagent/VoiceOptions";
 import AgentOptions from "./voiceagent/AgentOptions";
 import { LoadingOutlined } from '@ant-design/icons';
 import { getAgent } from "~/common/apis/api.request";
+import { Agent } from "~/types/agents";
 
 const ConfigureAgent = ({agentId}:any) => {
   const [options, setOptions] = useState<string[]>(["Agent", "Voice"]);
   const [selectedOption, setSelectedOption] = useState<string>("Agent");
   const [loading,setLoading] = useState<boolean>(true)
-  const [agentData,setAgentData]= useState<any[]>([]);
+  const [agentData,setAgentData]= useState<Agent>();
 
   const fetchData = async() => {
     setLoading(true);
@@ -21,12 +22,7 @@ const ConfigureAgent = ({agentId}:any) => {
       setAgentData(response);
     }
     setLoading(false);
-
   }
-
- 
-
-
 
   useEffect(()=>{
     fetchData();
@@ -34,7 +30,7 @@ const ConfigureAgent = ({agentId}:any) => {
 
 
   return (
-    <>
+    <Fragment>
         {loading ? <Flex className="h-screen border-l-[1px]" justify="center" align="center">
       <Spin indicator={<LoadingOutlined spin />}size="large"/>
       </Flex> : 
@@ -71,12 +67,12 @@ const ConfigureAgent = ({agentId}:any) => {
       </Space>
 
       {
-        selectedOption === 'Voice' ? <VoiceOptions /> : <AgentOptions agentData={agentData}/>
+        selectedOption === 'Voice' ? <VoiceOptions /> : agentData && <AgentOptions agentData={agentData}/>
       }
 
     </div>
     }
-    </>
+    </Fragment>
 
   )
 }

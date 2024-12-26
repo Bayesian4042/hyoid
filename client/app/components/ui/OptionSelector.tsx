@@ -1,6 +1,8 @@
 import { Flex, Select } from 'antd'
+import React from 'react'
+import { OptionSelectorProps } from '~/types/common'
 
-const OptionSelector = ({ title, desc,options,defaultValue}: any) => {
+const OptionSelector:React.FC<OptionSelectorProps> = ({ title, desc,options,defaultValue}) => {
   return (
     <Flex className='border-[1px] py-5 rounded-2xl px-8 bg-gray-50' justify='space-between' align='center'>
       <div className='w-[410px]'>
