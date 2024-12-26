@@ -7,9 +7,12 @@ import AgentOptions from "./voiceagent/AgentOptions";
 import { LoadingOutlined } from '@ant-design/icons';
 import { getAgent } from "~/common/apis/api.request";
 import { Agent } from "~/types/agents";
+import { useLocation } from "@remix-run/react";
+import TestChat from "./chatagent/TestChat";
 
 const ConfigureAgent = ({agentId}:any) => {
-  const [options, setOptions] = useState<string[]>(["Agent", "Voice"]);
+  const{pathname} = useLocation()
+  const [options, setOptions] = useState<string[]>(["Agent", pathname === "/"?"Voice":"Test"]);
   const [selectedOption, setSelectedOption] = useState<string>("Agent");
   const [loading,setLoading] = useState<boolean>(true)
   const [agentData,setAgentData]= useState<Agent>();
@@ -66,9 +69,13 @@ const ConfigureAgent = ({agentId}:any) => {
         ))}
       </Space>
 
-      {
-        selectedOption === 'Voice' ? <VoiceOptions /> : agentData && <AgentOptions agentData={agentData}/>
-      }
+      {selectedOption === "Voice" ? (
+            <VoiceOptions />
+          ) : selectedOption === "Test" ? (
+            <TestChat />
+          ) : (
+            agentData && <AgentOptions agentData={agentData} />
+          )}
 
     </div>
     }
