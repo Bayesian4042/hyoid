@@ -51,7 +51,7 @@ export class TextConversationService {
                     value: response
                 }));
 
-                ws.send(JSON.stringify({ type: 'typing', value: false }));
+                // ws.send(JSON.stringify({ type: 'typing', value: false }));
 
             } catch (error) {
                 console.error('Error processing message:', error);
