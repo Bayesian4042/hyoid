@@ -37,7 +37,7 @@ const ConfigureAgent = ({agentId}:any) => {
         {loading ? <Flex className="h-screen border-l-[1px]" justify="center" align="center">
       <Spin indicator={<LoadingOutlined spin />}size="large"/>
       </Flex> : 
-    <div className="relative border-l-[1px] h-screen px-3 py-4 overflow-y-scroll">
+    <div className="relative border-l-[1px] h-screen px-3 pt-4 overflow-y-scroll">
       <Flex justify="space-between" className="px-1">
         <div>
           <h1 className="font-semibold">

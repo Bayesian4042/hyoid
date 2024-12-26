@@ -1,7 +1,8 @@
 import axios from "axios";
-import { Agent } from "~/types/agents";
+import { Agent, ChatAgent } from "~/types/agents";
 
 const baseUrl = 'http://localhost:8000/agents'
+const chatUrl = 'http://localhost:8000/text-conversation/chat'
 
 export const getAllAgents = async(type:string):Promise<Agent[]> => {
     const response = await axios.get(`${baseUrl}?type=${type}`)
@@ -28,4 +29,9 @@ export const updateAgent = async(id:string,firstMessage:string,systemPrompt:stri
         temperature
     })
     return response.data.data
+}
+
+export const getChat = async(): Promise<ChatAgent> => {
+    const response = await axios.get(`${chatUrl}`)
+    return response.data
 }
