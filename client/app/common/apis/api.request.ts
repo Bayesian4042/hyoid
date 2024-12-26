@@ -1,14 +1,14 @@
 import axios from "axios";
-import { Agent, ApiResponse } from "~/types/agents";
+import { Agent } from "~/types/agents";
 
 const baseUrl = 'http://localhost:8000/agents'
 
-export const getAllAgents = async(type:string):Promise<ApiResponse<Agent[]>> => {
+export const getAllAgents = async(type:string):Promise<Agent[]> => {
     const response = await axios.get(`${baseUrl}?type=${type}`)
     return response.data.data;
 }
 
-export const createAgent = async(name:string,type:string):Promise<ApiResponse<Agent>> => {
+export const createAgent = async(name:string,type:string):Promise<Agent> => {
     const response = await axios.post(`${baseUrl}`,{
    name,
    type
@@ -16,7 +16,7 @@ export const createAgent = async(name:string,type:string):Promise<ApiResponse<Ag
     return response.data.data;
 }
 
-export const getAgent = async(id:string):Promise<ApiResponse<Agent>> => {
+export const getAgent = async(id:string):Promise<Agent> => {
     const response = await axios.get(`${baseUrl}/${id}`)
     return response.data.data
 }
