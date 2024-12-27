@@ -53,3 +53,25 @@ interface OptionSelectorProps {
   options?:{ value: string, label: string }[],
   defaultValue:string
 }
+
+interface FileInputProps {
+  file: File | null;
+  setFile: (file: File | null) => void;
+}
+
+interface UrlInputProps {
+  url: string;
+  setUrl: (url: string) => void;
+}
+
+interface TextInputProps {
+  name: string;
+  setName: (url: string) => void;
+  content: string
+  setContent: (url: string) => void;
+}
+
+interface KnowledgeBaseDrawerProps {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}

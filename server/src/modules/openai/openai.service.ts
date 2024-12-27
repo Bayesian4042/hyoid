@@ -98,7 +98,7 @@ export class OpenAIWrapper {
       try {
         return await func();
       } catch (error) {
-        attempts++;
+         attempts++;
         if (attempts >= maxAttempts) {
           throw error;
         }
@@ -112,7 +112,7 @@ export class OpenAIWrapper {
 
   async generateResponse(
     userPrompt: string,
-    systemPrompt?: string,
+    systemPrompt: string = "You are an helpful assitant which helps user with the any question.",
     options: {
       model?: string;
       maxTokens?: number;
@@ -142,7 +142,7 @@ export class OpenAIWrapper {
             max_tokens: maxTokens,
             temperature,
             response_format:
-              outputFormat === "json" ? { type: "json_object" } : undefined,
+             outputFormat === "json" ? { type: "json_object" } : undefined,
           });
         });
 
