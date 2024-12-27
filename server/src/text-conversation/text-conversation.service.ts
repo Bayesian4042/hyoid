@@ -1,5 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { IncomingMessage } from 'http';
+import { parse } from 'path';
 import { OpenAIWrapper } from 'src/modules/openai/openai.service';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { RagService } from 'src/rag/rag.service';
 import { WebSocket } from 'ws';
 
 interface ChatSession {
@@ -9,42 +13,58 @@ interface ChatSession {
 
 @Injectable()
 export class TextConversationService {
+    private logger = new Logger(TextConversationService.name);
     private chatSessions: Map<string, ChatSession> = new Map();
 
-    constructor(private readonly openAiService: OpenAIWrapper) {}
+    constructor(
+        private readonly openAiService: OpenAIWrapper,
+        private readonly ragService: RagService,
+        private readonly prismaService: PrismaService,
+    ) {}
     
-    handleConnection(ws: WebSocket, userId: string) {
-        console.log(`Client connected: ${userId}`);
-
-        if (!this.chatSessions.has(userId)) {
-            this.chatSessions.set(userId, { messages: [
-                {
-                    "role": "system",
-                    "content": "You are an helpful assitant which helps user with the any question."
-                }
-            ] });
-        }
+    async handleConnection(ws: WebSocket, request: IncomingMessage) {
+        console.log(`Agent connected:`);
+        let agentId = null;
+        let isAgentAvailable = false;
 
         ws.on('message', async (message: string) => {
             try {
                 const data = JSON.parse(message.toString());
                 console.log("data", data);
-                const session = this.chatSessions.get(userId);
+                agentId = data.agentId;
+
+                if(!isAgentAvailable) {
+                    if (!this.chatSessions.has(agentId)) {
+                        this.chatSessions.set(agentId, { messages: [
+                            {
+                                "role": "system",
+                                "content": await this.getSystemPrompt(agentId),
+                            }
+                        ] });
+                    }
+                    isAgentAvailable = true;
+                }
+                
+                const session = this.chatSessions.get(agentId);
+
+                const relevantContext = await this.ragService.searchSimilarText(data.message, agentId);
+
+                if (relevantContext) {
+                    session.messages.push({ role: 'assistant', content: relevantContext });
+                }
                 
                 session.messages.push({ role: 'user', content: data.message });
-
-                // ws.send(JSON.stringify({ type: 'typing', value: true }));
 
                 const response = await this.openAiService.generateChatResponse(session.messages, {outputFormat: 'string'});
 
                 session.messages.push({ role: 'assistant', content: response.content as string });
 
-                if (session.messages.length % 5 === 0) {
-                    const summaryResponse = await this.openAiService.generateResponse(
-                        `Summarize the conversation between user and assistant: \n ${session.messages.map((message) => `${message.role}: ${message.content}`).join('\n')}`
-                    );
-                    session.summary = summaryResponse.content as string;
-                }
+                // if (session.messages.length % 5 === 0) {
+                //     const summaryResponse = await this.openAiService.generateResponse(
+                //         `Summarize the conversation between user and assistant: \n ${session.messages.map((message) => `${message.role}: ${message.content}`).join('\n')}`
+                //     );
+                //     session.summary = summaryResponse.content as string;
+                // }
 
                 ws.send(JSON.stringify({
                     type: 'message',
@@ -70,4 +90,19 @@ export class TextConversationService {
             console.error('WebSocket error:', error);
         });
     }
+
+    private async getSystemPrompt(agentId: string): Promise<string> {
+		const existingAgent = await this.prismaService.agent.findUnique({
+			where: { id: agentId },
+		});
+
+		if (!existingAgent.systemPrompt) {
+			this.logger.warn(
+				"No active system prompt found, using fallback prompt",
+			);
+			return "You are an helpfull assitant";
+		}
+
+		return existingAgent.systemPrompt;
+	}
 }

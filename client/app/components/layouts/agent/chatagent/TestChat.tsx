@@ -31,6 +31,7 @@ const TestChat = () => {
     if (chatData?.wsEndpoint) {
       const socket = webSocketService(chatData.wsEndpoint);
       socket.connect();
+
       socketRef.current = socket;
 
       socket.onMessage((message) => {
@@ -55,7 +56,7 @@ const TestChat = () => {
     setInputData((prev) => [...prev, { user: "User", message: userInput }]);
     setLoading(true);
     if (userInput.trim()) {
-      socketRef.current?.sendMessage({ message: userInput });
+      socketRef.current?.sendMessage({ message: userInput, agentId: "123456" });
       setUserInput("");
     }
   };
