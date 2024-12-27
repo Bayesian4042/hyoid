@@ -1,116 +1,118 @@
-import { Injectable } from '@nestjs/common';
-import { Pinecone } from '@pinecone-database/pinecone';
+import { Injectable } from "@nestjs/common";
+import { Pinecone } from "@pinecone-database/pinecone";
 import OpenAI from "openai";
 
 @Injectable()
 export class RagService {
-    private pinecone: Pinecone;
-  private openaiClient: OpenAI;
-  
-  constructor() {
-    this.pinecone = new Pinecone({
-        apiKey: process.env.PINECONE_API_KEY,
-    });
+	private pinecone: Pinecone;
+	private openaiClient: OpenAI;
 
-    this.openaiClient = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-    });
-  }
+	constructor() {
+		this.pinecone = new Pinecone({
+			apiKey: process.env.PINECONE_API_KEY,
+		});
 
-  async processText(text: string, agentId: string): Promise<void> {
-    try {
-      const chunks = this.splitTextIntoChunks(text, 1000);
-      
-      const embeddings = await Promise.all(
-        chunks.map(async (chunk, index) => {
-          const response = await this.openaiClient.embeddings.create({
-            model: 'text-embedding-3-small',
-            input: chunk,
-          });
-          
-          return {
-            id: `${agentId}`,
-            values: response.data[0].embedding,
-            metadata: {
-                agentId,
-              text: chunk,
-              position: index,
-              timestamp: new Date().toISOString(),
-            },
-          };
-        })
-      );
+		this.openaiClient = new OpenAI({
+			apiKey: process.env.OPENAI_API_KEY,
+		});
+	}
 
-      await this.pinecone.createIndex({
-        name: process.env.PINECONE_INDEX,
-        dimension: 1536,
-        metric: 'cosine',
-        spec: { 
-            serverless: { 
-              cloud: 'aws', 
-              region: 'us-east-1' 
-            }
-          }
-      });
+	async processText(text: string, agentId: string): Promise<void> {
+		try {
+			const chunks = this.splitTextIntoChunks(text, 1000);
 
-      const index = this.pinecone.index(process.env.PINECONE_INDEX);
+			const embeddings = await Promise.all(
+				chunks.map(async (chunk, index) => {
+					const response = await this.openaiClient.embeddings.create({
+						model: "text-embedding-3-small",
+						input: chunk,
+					});
 
-      await index.namespace(agentId).upsert(embeddings);
+					return {
+						id: `${agentId}`,
+						values: response.data[0].embedding,
+						metadata: {
+							agentId,
+							text: chunk,
+							position: index,
+							timestamp: new Date().toISOString(),
+						},
+					};
+				}),
+			);
 
-    } catch (error) {
-      console.error('Error processing text:', error);
-      throw error;
-    }
-  }
+			await this.pinecone.createIndex({
+				name: process.env.PINECONE_INDEX,
+				dimension: 1536,
+				metric: "cosine",
+				spec: {
+					serverless: {
+						cloud: "aws",
+						region: "us-east-1",
+					},
+				},
+			});
 
-  private splitTextIntoChunks(text: string, chunkSize: number): string[] {
-    const chunks: string[] = [];
-    const sentences = text.split(/[.!?]+/);
-    let currentChunk = '';
+			const index = this.pinecone.index(process.env.PINECONE_INDEX);
 
-    for (const sentence of sentences) {
-      if (currentChunk.length + sentence.length > chunkSize) {
-        chunks.push(currentChunk.trim());
-        currentChunk = '';
-      }
-      currentChunk += sentence + '. ';
-    }
+			await index.namespace(agentId).upsert(embeddings);
+		} catch (error) {
+			console.error("Error processing text:", error);
+			throw error;
+		}
+	}
 
-    if (currentChunk) {
-      chunks.push(currentChunk.trim());
-    }
+	private splitTextIntoChunks(text: string, chunkSize: number): string[] {
+		const chunks: string[] = [];
+		const sentences = text.split(/[.!?]+/);
+		let currentChunk = "";
 
-    return chunks;
-  }
+		for (const sentence of sentences) {
+			if (currentChunk.length + sentence.length > chunkSize) {
+				chunks.push(currentChunk.trim());
+				currentChunk = "";
+			}
+			currentChunk += sentence + ". ";
+		}
 
-  async searchSimilarText(query: string, agentId: string, limit: number = 5): Promise<any> {
-    try {
-      const response = await this.openaiClient.embeddings.create({
-        model: 'text-embedding-3-small',
-        input: query,
-      });
-      
-      const queryEmbedding = response.data[0].embedding;
-      
-      const index = this.pinecone.index(process.env.PINECONE_INDEX);
+		if (currentChunk) {
+			chunks.push(currentChunk.trim());
+		}
 
-      const queryResponse = await index.namespace(agentId).query({
-        vector: queryEmbedding,
-        topK: limit,
-        includeValues: true,
-        includeMetadata: true,
-        });
+		return chunks;
+	}
 
-        const relevantContext = queryResponse.matches
-            .filter((match: any) => match.metadata.score > 0.60)
-            .map((match: any) => match.metadata.text)
-            .join('\n');
+	async searchSimilarText(
+		query: string,
+		agentId: string,
+		limit: number = 5,
+	): Promise<any> {
+		try {
+			const response = await this.openaiClient.embeddings.create({
+				model: "text-embedding-3-small",
+				input: query,
+			});
 
-        return relevantContext;
+			const queryEmbedding = response.data[0].embedding;
 
-    } catch (error) {
-      console.error('Error searching similar text:', error);
-      throw error;
-    }
-  }
+			const index = this.pinecone.index(process.env.PINECONE_INDEX);
+
+			const queryResponse = await index.namespace(agentId).query({
+				vector: queryEmbedding,
+				topK: limit,
+				includeValues: true,
+				includeMetadata: true,
+			});
+
+			const relevantContext = queryResponse.matches
+				.filter((match: any) => match.metadata.score > 0.6)
+				.map((match: any) => match.metadata.text)
+				.join("\n");
+
+			return relevantContext;
+		} catch (error) {
+			console.error("Error searching similar text:", error);
+			throw error;
+		}
+	}
 }

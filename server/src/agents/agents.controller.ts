@@ -11,7 +11,7 @@ import {
 } from "@nestjs/common";
 import { AgentsService } from "./agents.service";
 import { ResponseUtil } from "src/common/utils/response.util";
-import { CreateAgentDto,AgentType, UpdateAgentDto } from "./agents.dto";
+import { CreateAgentDto, AgentType, UpdateAgentDto } from "./agents.dto";
 
 @Controller("agents")
 export class AgentsController {
@@ -19,22 +19,20 @@ export class AgentsController {
 
 	@Post()
 	@HttpCode(HttpStatus.CREATED)
-	async createAgent(
-		@Body() createAgentDto:CreateAgentDto,
-	) {
+	async createAgent(@Body() createAgentDto: CreateAgentDto) {
 		if (!["chat", "voice"].includes(createAgentDto.type)) {
 			return ResponseUtil.error(
 				"Please provide a valid type",
 				403,
-				"Valid type not provided."
+				"Valid type not provided.",
 			);
 		}
-	
+
 		if (!createAgentDto.name || createAgentDto.name.trim() === "") {
 			return ResponseUtil.error(
 				"Please provide a valid name",
 				403,
-				"Valid name not provided."
+				"Valid name not provided.",
 			);
 		}
 		const newAgent = await this.agentsService.create(createAgentDto);
@@ -47,11 +45,19 @@ export class AgentsController {
 		@Param("id") id: string,
 		@Body() updateAgentDto: UpdateAgentDto,
 	) {
-		if(!updateAgentDto) {
-			return ResponseUtil.error("Please Provide valid id",403,"Valid id not provided.")
+		if (!updateAgentDto) {
+			return ResponseUtil.error(
+				"Please Provide valid id",
+				403,
+				"Valid id not provided.",
+			);
 		}
-		if(!Object.keys(updateAgentDto).length) {
-			return ResponseUtil.error("Please Provide Values to be updated.",403,"Values not provided.")
+		if (!Object.keys(updateAgentDto).length) {
+			return ResponseUtil.error(
+				"Please Provide Values to be updated.",
+				403,
+				"Values not provided.",
+			);
 		}
 		const updatedAgent = this.agentsService.update(id, updateAgentDto);
 		return ResponseUtil.success(updatedAgent);
@@ -59,21 +65,27 @@ export class AgentsController {
 
 	@Get(":id")
 	async getAgent(@Param("id") id: string) {
-		if(!id) {
-			return ResponseUtil.error("Please Provide valid id",403,"Valid id not provided.")
+		if (!id) {
+			return ResponseUtil.error(
+				"Please Provide valid id",
+				403,
+				"Valid id not provided.",
+			);
 		}
 		const agent = await this.agentsService.getAgent(id);
 		return ResponseUtil.success(agent);
 	}
 
 	@Get()
-	async getAllAgents(
-		@Query("type") type:AgentType
-	) {
-		if (!["chat","voice"].includes(type)) {
-			return ResponseUtil.error("Please Provide valid Type",403,"Valid type not provided.")
+	async getAllAgents(@Query("type") type: AgentType) {
+		if (!["chat", "voice"].includes(type)) {
+			return ResponseUtil.error(
+				"Please Provide valid Type",
+				403,
+				"Valid type not provided.",
+			);
 		}
 		const agents = await this.agentsService.getAllAgents(type);
-		return ResponseUtil.success(agents)
+		return ResponseUtil.success(agents);
 	}
 }

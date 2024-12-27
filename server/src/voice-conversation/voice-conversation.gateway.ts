@@ -13,11 +13,15 @@ import { VoiceConversationService } from "./voice-conversation.service";
 @WebSocketGateway({
 	path: "/twilio",
 })
-export class VoiceConversationGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class VoiceConversationGateway
+	implements OnGatewayConnection, OnGatewayDisconnect
+{
 	@WebSocketServer()
 	server: Server;
 
-	constructor(private readonly voiceConversationService: VoiceConversationService) {}
+	constructor(
+		private readonly voiceConversationService: VoiceConversationService,
+	) {}
 
 	handleConnection(client: any, request: IncomingMessage) {
 		console.log("Twilio WebSocket client connected:");
