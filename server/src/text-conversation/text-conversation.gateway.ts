@@ -13,7 +13,7 @@ import { IncomingMessage } from "http";
 import { TextConversationService } from "./text-conversation.service";
 
 @WebSocketGateway({
-    path: '/test'
+    path: '/test',
 })
 export class TextConversationGateway {
 
@@ -25,7 +25,7 @@ export class TextConversationGateway {
 
 	handleConnection(client: any, request: IncomingMessage) {
 		console.log("Twilio WebSocket client connected:");
-		this.voiceConversationService.handleConnection(client, "123");
+		this.voiceConversationService.handleConnection(client, request);
 	}
 
 	handleDisconnect(client: any) {

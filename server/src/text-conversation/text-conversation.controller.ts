@@ -1,4 +1,4 @@
-import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, HttpException, HttpStatus, Query } from '@nestjs/common';
 import { TextConversationService } from './text-conversation.service';
 
 @Controller('text-conversation')
@@ -6,7 +6,7 @@ export class TextConversationController {
   constructor(private readonly textConversationService: TextConversationService) {}
 
   @Get('chat')
-  async startChat() {
+  async startChat(@Query('agentId') agentId: string) {
     try {
       const wsEndpoint = `ws://localhost:8000/test`;
       return {
