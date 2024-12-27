@@ -1,5 +1,6 @@
 import { AzureOpenAI, OpenAI } from "openai";
 import * as dotenv from "dotenv";
+import { Chat } from "groq-sdk/resources";
 
 dotenv.config();
 
@@ -48,9 +49,23 @@ interface OpenAIWrapperConfig {
 	maxRetries?: number;
 }
 
-interface ChatMessage {
-	role: "system" | "user" | "assistant";
+interface BaseMessage {
+	role: "system" | "user" | "assistant" | "tool";
+	tool_call_id?: string;
+	name?: string;
+  }
+  
+interface ContentMessage extends BaseMessage {
 	content: string;
+}
+  
+type ChatMessage = ContentMessage | (BaseMessage & { content?: string });
+
+interface ChatToolMessage {
+	role: "tool";
+	content: string;
+	tool_call_id?: string;
+	name?: string;
 }
 
 export class OpenAIWrapper {
@@ -241,7 +256,7 @@ export class OpenAIWrapper {
 	}
 
 	async generateChatResponse(
-		messages: ChatMessage[],
+		messages: any[],
 		options: {
 			model?: string;
 			maxTokens?: number;
@@ -261,6 +276,7 @@ export class OpenAIWrapper {
 		let retryCount = 0;
 		while (retryCount < this.maxRetries) {
 			try {
+				let content = "";
 				const response = await this.retryApiCall(async () => {
 					return await this.client.chat.completions.create({
 						model,
@@ -271,26 +287,50 @@ export class OpenAIWrapper {
 							outputFormat === "json"
 								? { type: "json_object" }
 								: undefined,
-						tools: tools,
+						tools: tools.map((tool: any) => tool.toolDefinition),
 						tool_choice: "auto",
 					});
 				});
 
-				let content = response.choices[0].message.content || "";
+				const response_message = response.choices[0].message;
 
-				if (outputFormat === "json") {
-					content = content.replace(/```json\n?|\n?```/g, "").trim();
-					try {
-						content = JSON.parse(content);
-					} catch (error) {
-						retryCount++;
-						if (retryCount >= this.maxRetries) {
-							throw new Error(
-								`Failed to parse response as JSON after ${this.maxRetries} retries.`,
+				if (response_message.tool_calls) {
+					messages.push(response_message);
+
+					for (let tool_call of response_message.tool_calls) {
+						const allTools = tools.map((tool) => tool.name);
+						if (allTools.includes(tool_call.function.name)) {
+							const tool = tools.find((t) => t.name === tool_call.function.name);
+							const function_args = JSON.parse(
+								tool_call.function.arguments,
 							);
-						}
-						continue;
+							console.log("Function args: ", function_args);
+							const tool_response = tool.functionDefinition(...Object.values(function_args));
+							messages.push({
+								tool_call_id: tool_call.id,
+								role: "tool",
+								name: tool.name,
+								content: tool_response,
+							});
+						 }
 					}
+
+					const finalResponse = await this.retryApiCall(async () => {
+						return await this.client.chat.completions.create({
+							model,
+							messages,
+							max_tokens: maxTokens,
+							temperature,
+							response_format:
+								outputFormat === "json"
+									? { type: "json_object" }
+									: undefined,
+						});
+					});
+
+					content = finalResponse.choices[0].message.content || "";
+				} else {
+					content = response.choices[0].message.content || "";
 				}
 
 				const tokenUsage: TokenUsage = {
