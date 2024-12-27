@@ -5,10 +5,10 @@ import { WebSocketService, webSocketService } from "~/common/webhook/websocket";
 import { ChatAgent } from "~/types/agents";
 
 const TestChat = () => {
-  const [userInput, setUserInput] = useState("");
+  const [userInput, setUserInput] = useState<string>("");
   const [inputData, setInputData] = useState<{ user: string; message: string }[]>([]);
   const socketRef = useRef<WebSocketService | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [chatData, setChatData] = useState<ChatAgent>(); 
 
   const startChat = async () => {
