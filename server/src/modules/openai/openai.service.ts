@@ -1,6 +1,5 @@
 import { AzureOpenAI, OpenAI } from "openai";
 import * as dotenv from "dotenv";
-import { Chat } from "groq-sdk/resources";
 
 dotenv.config();
 
