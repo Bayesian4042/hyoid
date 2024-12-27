@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { IncomingMessage } from "http";
-import { parse } from "path";
+import { tools } from "src/llm-tools/constants/tools.contant";
 import { OpenAIWrapper } from "src/modules/openai/openai.service";
 import { PrismaService } from "src/prisma/prisma.service";
 import { RagService } from "src/rag/rag.service";
@@ -40,7 +40,7 @@ export class TextConversationService {
 								{
 									role: "system",
 									content:
-										await this.getSystemPrompt(agentId),
+										"You are a helpful assistant",
 								},
 							],
 						});
@@ -66,7 +66,10 @@ export class TextConversationService {
 
 				const response = await this.openAiService.generateChatResponse(
 					session.messages,
-					{ outputFormat: "string" },
+					{ 
+                        outputFormat: "string",
+                        tools: tools,
+                    },
 				);
 
 				session.messages.push({
