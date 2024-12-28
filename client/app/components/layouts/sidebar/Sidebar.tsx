@@ -1,12 +1,11 @@
-import { Button, Dropdown, Flex, MenuProps, Space } from "antd";
-import { MdOutlineChat } from "react-icons/md";
+import { Button, Flex,  Space } from "antd";
 import { FaChevronDown } from "react-icons/fa6";
-import { RiUserVoiceLine } from "react-icons/ri";
 import { BiChat } from "react-icons/bi";
 import { ReactNode } from "react";
 import { Link } from "@remix-run/react";
-import { RiVoiceAiLine } from "react-icons/ri";
 import { useLocation } from "@remix-run/react";
+import { RiChatAiLine, RiVoiceAiLine } from 'react-icons/ri'
+
 
 
 
@@ -25,10 +24,10 @@ export default function Sidebar() {
                     <NavTitle title="CREATE" />
                     <Space size={2} direction="vertical" className="w-full">
                         <Link to="/">
-                            <NavButton icon={<RiUserVoiceLine size={20} />} title="Voice Agent" selected="/" />
+                            <NavButton icon={<RiVoiceAiLine size={20} />} title="Voice Agent" selected="/" />
                         </Link>
                         <Link to="/chatagent">
-                            <NavButton icon={<MdOutlineChat size={20} />} title="Chat Agent" selected="/chatagent" />
+                            <NavButton icon={<RiChatAiLine size={20} />} title="Chat Agent" selected="/chatagent" />
                         </Link>
                     </Space>
                 </div>
