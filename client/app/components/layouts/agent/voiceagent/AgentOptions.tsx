@@ -15,6 +15,7 @@ import { Flag } from '~/types/common'
 const AgentOptions = ({agentData}:{agentData:Agent}) => {
 
 
+
     const[isOpenKnowledgeBase,setIsOpenKnowledgeBase] = useState<boolean>(false)
     const[isOpenTools,setIsOpenTools] = useState<boolean>(false)
 
@@ -90,7 +91,7 @@ const AgentOptions = ({agentData}:{agentData:Agent}) => {
             }
         
         </Space>
-    <KnowledgeBaseDrawer open={isOpenKnowledgeBase} setOpen={setIsOpenKnowledgeBase}/>
+    <KnowledgeBaseDrawer  agentId={agentData.id} open={isOpenKnowledgeBase} setOpen={setIsOpenKnowledgeBase}/>
     <ToolsDrawer open={isOpenTools} setOpen={setIsOpenTools}/>
     </div>
     )

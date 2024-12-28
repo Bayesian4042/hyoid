@@ -1,10 +1,11 @@
 import { Avatar, Button, Flex, Input, Space, Typography } from "antd";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { getChat } from "~/common/apis/api.request";
 import { WebSocketService, webSocketService } from "~/common/webhook/websocket";
 import { ChatAgent } from "~/types/agents";
+import { TestChatProps } from "~/types/common";
 
-const TestChat = () => {
+const TestChat:React.FC<TestChatProps> = ({agentId}) => {
   const [userInput, setUserInput] = useState<string>("");
   const [inputData, setInputData] = useState<{ user: string; message: string }[]>([]);
   const socketRef = useRef<WebSocketService | null>(null);
@@ -56,7 +57,7 @@ const TestChat = () => {
     setInputData((prev) => [...prev, { user: "User", message: userInput }]);
     setLoading(true);
     if (userInput.trim()) {
-      socketRef.current?.sendMessage({ message: userInput, agentId: "123456" });
+      socketRef.current?.sendMessage({ message: userInput, agentId: agentId });
       setUserInput("");
     }
   };
@@ -80,6 +81,11 @@ const TestChat = () => {
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
           placeholder="Type your message..."
+          onKeyDown={e=>{
+            if (e.key === "Enter") {
+            e.preventDefault();
+            handleClick();
+          } }}
         />
         <Button color="default" variant="solid" disabled={loading} className="h-10" onClick={handleClick}>
           {loading ? "Sending..." : "Submit"}

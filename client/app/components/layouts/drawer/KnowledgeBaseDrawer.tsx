@@ -4,15 +4,26 @@ import { CiFileOn } from "react-icons/ci";
 import React, { useState } from "react";
 import { LuUpload } from "react-icons/lu";
 import { FileInputProps, KnowledgeBaseDrawerProps, TextInputProps, UrlInputProps } from "~/types/common";
+import { uploadText } from "~/common/apis/api.request";
 
 
 
-const KnowledgeBaseDrawer:React.FC<KnowledgeBaseDrawerProps> = ({open,setOpen}) => {
+const KnowledgeBaseDrawer:React.FC<KnowledgeBaseDrawerProps> = ({open,setOpen,agentId}) => {
     const [selected,setSelected] = useState("file")
     const[url,setUrl] = useState<string>("")
     const[name,setName] = useState<string>("");
     const[content,setContent] = useState<string>("");
     const[file,setFile] = useState<File|null>(null)
+
+    const handleSubmit = async() => {
+      if(!content){
+        message.error("Please Enter text first")
+        return;
+      }
+      await uploadText(agentId,content);
+      setContent("")
+    }
+
   return (
     <Drawer width={600} open={open} onClose={()=> setOpen(false)} title={<Flex gap='small' align='center'><Logo logo={<CiFileOn size={20}/>}/> <h3>Add Knowledge Base Item</h3></Flex>}>
       <Flex vertical justify="space-between" className="h-[calc(100vh-119px)]">
@@ -29,7 +40,7 @@ const KnowledgeBaseDrawer:React.FC<KnowledgeBaseDrawerProps> = ({open,setOpen}) 
         </div>
         <Flex justify="flex-end" gap={10}>
             <Button>Cancle</Button>
-            <Button variant="solid" color="default">Add item</Button>
+            <Button variant="solid" color="default" onClick={handleSubmit}>Add item</Button>
         </Flex>
       </Flex>
     </Drawer>

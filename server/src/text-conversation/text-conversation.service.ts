@@ -121,7 +121,7 @@ export class TextConversationService {
 			this.logger.warn(
 				"No active system prompt found, using fallback prompt",
 			);
-			return "You are an helpfull assitant";
+			return "You are an helpfull assistant";
 		}
 
 		return existingAgent.systemPrompt;

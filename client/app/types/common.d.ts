@@ -74,4 +74,9 @@ interface TextInputProps {
 interface KnowledgeBaseDrawerProps {
   open: boolean;
   setOpen: (open: boolean) => void;
+  agentId:string
+}
+
+interface TestChatProps {
+  agentId: string;
 }

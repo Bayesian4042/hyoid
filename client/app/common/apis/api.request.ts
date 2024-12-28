@@ -3,6 +3,7 @@ import { Agent, ChatAgent } from "~/types/agents";
 
 const baseUrl = 'http://localhost:8000/agents'
 const chatUrl = 'http://localhost:8000/text-conversation/chat'
+const knowledgeBaseUrl = 'http://localhost:8000/rag'
 
 export const getAllAgents = async(type:string):Promise<Agent[]> => {
     const response = await axios.get(`${baseUrl}?type=${type}`)
@@ -34,4 +35,11 @@ export const updateAgent = async(id:string,firstMessage:string,systemPrompt:stri
 export const getChat = async(): Promise<ChatAgent> => {
     const response = await axios.get(`${chatUrl}`)
     return response.data
+}
+
+export const uploadText = async(agentId:string,content:string) => {
+    const response = await axios.post(`${knowledgeBaseUrl}/${agentId}`,{
+        "text":content
+    })
+    console.log(response)
 }
