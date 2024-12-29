@@ -9,7 +9,7 @@ export class AgentsService {
 		const agent = await this.prismaService.agent.create({
 			data: {
 				name: createAgentDto.name,
-				type: createAgentDto.type
+				type: createAgentDto.type,
 			},
 		});
 		return agent;
@@ -28,7 +28,7 @@ export class AgentsService {
 		});
 	}
 
-	async getAllAgents(type:AgentType){
-		return this.prismaService.agent.findMany({where:{type}})
+	async getAllAgents(type: AgentType) {
+		return this.prismaService.agent.findMany({ where: { type } });
 	}
 }

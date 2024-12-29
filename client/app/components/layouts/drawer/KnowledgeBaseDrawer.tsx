@@ -7,15 +7,23 @@ import { useLocation } from "@remix-run/react";
 import SelectorOption from "~/components/ui/SelectorOption";
 import SubmitButton from "~/components/ui/SubmitButton";
 
-
 const KnowledgeBaseDrawer:React.FC<KnowledgeBaseDrawerProps> = ({open,setOpen}) => {
-  const {pathname} = useLocation()  
-  const [selectedOption,setSelectedOption] = useState("file")
-  const[options,setOptions] = useState(["file","url","text"])
+    const {pathname} = useLocation()  
+    const [selectedOption,setSelectedOption] = useState("file")
+    const[options,setOptions] = useState(["file","url","text"])
     const[url,setUrl] = useState<string>("")
     const[name,setName] = useState<string>("");
     const[content,setContent] = useState<string>("");
     const[file,setFile] = useState<File|null>(null)
+
+    const handleSubmit = () => {
+      if(!content){
+        message.error("Please Enter text first")
+        return;
+      }
+      setContent("")
+    }
+
   return (
     <Drawer width={600} open={open} onClose={()=> setOpen(false)} title={<Flex gap='small' align='center'><EmojiAvatar pathname={pathname}/> <h3>Add Knowledge Base Item</h3></Flex>}>
       <Flex vertical justify="space-between" className="h-[calc(100vh-129px)]">
@@ -30,7 +38,7 @@ const KnowledgeBaseDrawer:React.FC<KnowledgeBaseDrawerProps> = ({open,setOpen}) 
         <Flex className="mb-20 px-20" gap={10} align="center" justify="space-between">
           <SubmitButton text="Add Item"/>
           <Button variant="outlined" color="danger" className="text-xl rounded-3xl px-10 py-5">Cancle</Button>
-          </Flex>          
+          </Flex>
       </Flex>
     </Drawer>
   )

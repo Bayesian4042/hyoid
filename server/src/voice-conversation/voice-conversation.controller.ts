@@ -6,9 +6,7 @@ import { ConfigService } from "@nestjs/config";
 @Controller("conversations")
 export class VoiceConversationController {
 	private logger = new Logger(VoiceConversationController.name);
-	constructor(
-		private readonly configService: ConfigService,
-	) {}
+	constructor(private readonly configService: ConfigService) {}
 
 	@Get("/")
 	getRoot(@Res() res: Response) {

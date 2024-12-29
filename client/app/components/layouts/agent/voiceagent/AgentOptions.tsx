@@ -101,7 +101,7 @@ const AgentOptions = ({agentData}:{agentData:Agent}) => {
             }
         
         </Space>
-    <KnowledgeBaseDrawer open={isOpenKnowledgeBase} setOpen={setIsOpenKnowledgeBase}/>
+    <KnowledgeBaseDrawer  agentId={agentData.id} open={isOpenKnowledgeBase} setOpen={setIsOpenKnowledgeBase}/>
     <ToolsDrawer open={isOpenTools} setOpen={setIsOpenTools}/>
     </div>
     )
