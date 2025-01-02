@@ -11,6 +11,7 @@ import { PrismaService } from "./prisma/prisma.service";
 import { TextConversationModule } from "./text-conversation/text-conversation.module";
 import { RagModule } from "./rag/rag.module";
 import { LlmToolsModule } from "./llm-tools/llm-tools.module";
+import { TwitterModule } from "./twitter/twitter.module";
 
 @Module({
 	imports: [
@@ -40,6 +41,7 @@ import { LlmToolsModule } from "./llm-tools/llm-tools.module";
 		TextConversationModule,
 		RagModule,
 		LlmToolsModule,
+		TwitterModule
 	],
 	controllers: [AppController, AgentsController],
 	providers: [AppService, AgentsService, PrismaService],
