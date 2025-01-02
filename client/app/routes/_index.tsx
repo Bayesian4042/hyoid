@@ -8,6 +8,7 @@ import SelectAgent from "~/components/layouts/agent/SelectAgent";
 import { getAllAgents } from "~/common/apis/api.request";
 import { useLoaderData } from "@remix-run/react";
 import { Agent } from "~/types/agents";
+import { IoMdAdd } from "react-icons/io";
 
 export const meta: MetaFunction = () => {
   return [
@@ -34,21 +35,17 @@ export default function Index() {
 
   const buttons = [
     { 
-      title: "playground", 
-      action: () => console.log("Playground button clicked!") 
-    },
-    { 
-      title: "+", 
+      icon: <IoMdAdd/>,
       action: () => setOpen(true)
     }
   ];
 
   return (
     <Flex >
-      <div className="flex-[0.35]">
+      <div className="flex-[0.30]">
         <HeaderWithAgent title='Voice Agent' buttons={buttons} setAgentId={setAgentId} agents={agents} />
       </div>
-      <div className="flex-[0.65]">
+      <div className="flex-[0.70]">
         {
         agentId ?
       <ConfigureAgent agentId={agentId}/> :

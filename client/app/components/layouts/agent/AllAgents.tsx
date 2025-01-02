@@ -1,13 +1,14 @@
 import { Flex } from 'antd';
-import { LuBot } from "react-icons/lu";
-import { SlOptions } from "react-icons/sl";
+import { HiMenuAlt4 } from "react-icons/hi";
 import { AllAgentsProps } from '~/types/common';
+import { useLocation } from '@remix-run/react';
+import EmojiAvatar from '~/components/ui/EmojiAvatar';
 
 
 
 export default  function AllAgents({setAgentId,agents}:AllAgentsProps) {
   return (
-    <div className='p-4 h-[calc(100vh-64px)] overflow-y-scroll'>
+    <div className='px-4 py-1 h-[calc(100vh-64px)] overflow-y-auto' style={{scrollbarWidth:"thin"}}>
       {
         agents?.map((agent:any) => (
           <div onClick={() => setAgentId(agent.id)} key={agent.id}>
@@ -21,14 +22,15 @@ export default  function AllAgents({setAgentId,agents}:AllAgentsProps) {
 
 
 const AgentLink = ({ title }: { title: string}) => {
+  const {pathname} = useLocation()
   return (<Flex justify='space-between' align='center' className='rounded-lg hover:bg-gray-50 p-3 cursor-pointer' >
     <Flex gap='small' align='center'>
-      <div className='bg-gray-100 p-3  rounded-lg'>
-        <LuBot size={20} />
-      </div>
-      <h1>{title}</h1>
+       <EmojiAvatar pathname={pathname}/> 
+                  
+      
+      <h1 className='font-semibold text-sm'>{title}</h1>
     </Flex>
-    <SlOptions size={10} />
+    <HiMenuAlt4 size={20} />
   </Flex>)
 }
 

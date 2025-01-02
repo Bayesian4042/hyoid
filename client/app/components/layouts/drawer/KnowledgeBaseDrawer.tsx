@@ -1,47 +1,44 @@
 import { Button, Drawer, Flex, Input, message, Space, Typography, Upload, UploadProps } from "antd"
-import Logo from "~/components/ui/Logo"
-import { CiFileOn } from "react-icons/ci";
+import EmojiAvatar from "~/components/ui/EmojiAvatar"
 import React, { useState } from "react";
 import { LuUpload } from "react-icons/lu";
 import { FileInputProps, KnowledgeBaseDrawerProps, TextInputProps, UrlInputProps } from "~/types/common";
-import { uploadText } from "~/common/apis/api.request";
+import { useLocation } from "@remix-run/react";
+import SelectorOption from "~/components/ui/SelectorOption";
+import SubmitButton from "~/components/ui/SubmitButton";
 
-
-
-const KnowledgeBaseDrawer:React.FC<KnowledgeBaseDrawerProps> = ({open,setOpen,agentId}) => {
-    const [selected,setSelected] = useState("file")
+const KnowledgeBaseDrawer:React.FC<KnowledgeBaseDrawerProps> = ({open,setOpen}) => {
+    const {pathname} = useLocation()  
+    const [selectedOption,setSelectedOption] = useState("file")
+    const[options,setOptions] = useState(["file","url","text"])
     const[url,setUrl] = useState<string>("")
     const[name,setName] = useState<string>("");
     const[content,setContent] = useState<string>("");
     const[file,setFile] = useState<File|null>(null)
 
-    const handleSubmit = async() => {
+    const handleSubmit = () => {
       if(!content){
         message.error("Please Enter text first")
         return;
       }
-      await uploadText(agentId,content);
       setContent("")
     }
 
   return (
-    <Drawer width={600} open={open} onClose={()=> setOpen(false)} title={<Flex gap='small' align='center'><Logo logo={<CiFileOn size={20}/>}/> <h3>Add Knowledge Base Item</h3></Flex>}>
-      <Flex vertical justify="space-between" className="h-[calc(100vh-119px)]">
+    <Drawer width={600} open={open} onClose={()=> setOpen(false)} title={<Flex gap='small' align='center'><EmojiAvatar pathname={pathname}/> <h3>Add Knowledge Base Item</h3></Flex>}>
+      <Flex vertical justify="space-between" className="h-[calc(100vh-129px)]">
         <div>
-        <Typography.Title level={5}>item type</Typography.Title>
-        <Flex gap='small'>
-            <Button className="w-full" onClick={() =>setSelected("file")}>File</Button>
-            <Button className="w-full" onClick={() =>setSelected("url")}>Url</Button>
-            <Button className="w-full" onClick={() =>setSelected("text")}>Text</Button>
-        </Flex>
+        <div className="mb-5">
+        <SelectorOption selectedOption={selectedOption} setSelectedOption={setSelectedOption} options={options}/>
+        </div>
         <div>
-            {selected === "file" ? <FileInput file={file} setFile={setFile}  />:selected === "url" ? <UrlInput url={url} setUrl={setUrl}/> : <TextInput name={name} setName={setName} content={content} setContent={setContent}/>}
+            {selectedOption === "file" ? <FileInput file={file} setFile={setFile}  />:selectedOption === "url" ? <UrlInput url={url} setUrl={setUrl}/> : <TextInput name={name} setName={setName} content={content} setContent={setContent}/>}
         </div>
         </div>
-        <Flex justify="flex-end" gap={10}>
-            <Button>Cancle</Button>
-            <Button variant="solid" color="default" onClick={handleSubmit}>Add item</Button>
-        </Flex>
+        <Flex className="mb-20 px-20" gap={10} align="center" justify="space-between">
+          <SubmitButton text="Add Item"/>
+          <Button variant="outlined" color="danger" className="text-xl rounded-3xl px-10 py-5">Cancle</Button>
+          </Flex>
       </Flex>
     </Drawer>
   )
@@ -74,7 +71,7 @@ const FileInput:React.FC<FileInputProps> = ({ file, setFile }) => {
   
     return (
       <div>
-        <p className="mt-2 mb-4">
+        <p className="mt-2 mb-4 text-gray-500">
           Upload files that will be passed to the LLM alongside the prompt.
         </p>
         <Upload.Dragger style={{ backgroundColor: "white" }} {...props}>
@@ -94,7 +91,7 @@ const FileInput:React.FC<FileInputProps> = ({ file, setFile }) => {
 const UrlInput:React.FC<UrlInputProps> = ({url,setUrl}) => {
     return (
         <Space className="w-full mt-2" direction="vertical">
-            <p>Specify a URL where the knowledge base is hosted (For example, a documentation website). The URL will be scraped and its text content will be passed to the LLM alongside the prompt.</p>
+            <p className="text-gray-500">Specify a URL where the knowledge base is hosted (For example, a documentation website). The URL will be scraped and its text content will be passed to the LLM alongside the prompt.</p>
             <h1 className="font-bold">Text Name</h1>
             <Input value={url} onChange={e => setUrl(e.target.value)}/>
         </Space>
@@ -106,7 +103,7 @@ const TextInput:React.FC<TextInputProps> = ({name,setName,content,setContent}) =
     return (
         <Flex vertical justify="space-between">
         <Space className="w-full mt-2" direction="vertical">
-        <p>Enter raw text directly to be passed to the LLM alongside the prompt.</p>
+        <p className="text-gray-500">Enter raw text directly to be passed to the LLM alongside the prompt.</p>
        <h1 className="font-bold">Text Name</h1>
        <Input value={name} onChange={e => setName(e.target.value)}/>
        <h1 className="font-bold">Text Content</h1>

@@ -1,7 +1,8 @@
+import { ReactNode } from "react";
 import { Agent } from "./agents";
 
 interface ButtonProps {
-    title: string; 
+    icon: ReactNode;
     action: () => void 
 }
 
@@ -37,6 +38,14 @@ interface InputFieldProps {
   row : number,
   value:string,
   setValue:(firstMessage: string) => void; 
+}
+
+interface NumberInputProps {
+  title : string,
+  desc : string,
+  row : number,
+  value: number | null,
+  setValue:(contactNumber: number | null) => void; 
 }
 
 

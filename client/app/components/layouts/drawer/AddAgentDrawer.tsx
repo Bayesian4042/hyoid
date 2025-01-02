@@ -1,11 +1,11 @@
-import { Button, Drawer, Flex, Input,Typography } from 'antd'
-import Logo from '~/components/ui/Logo'
-import { LuBot } from "react-icons/lu"
+import {  Drawer, Flex, Input,Typography } from 'antd'
+import EmojiAvatar from '~/components/ui/EmojiAvatar'
 import { useState } from 'react'
 import { createAgent, getAllAgents } from '~/common/apis/api.request'
 import { useLocation } from "@remix-run/react";
+import SubmitButton from '~/components/ui/SubmitButton'
 
-const AddAgentDrawer = ({setOpen,open,title,setAgents}:any) => {
+const AddAgentDrawer = ({setOpen,open,setAgents}:any) => {
   const[agentName,setAgentName] = useState("");
 
   const {pathname} = useLocation()
@@ -18,16 +18,20 @@ const AddAgentDrawer = ({setOpen,open,title,setAgents}:any) => {
       setOpen(false);
   }
   return (
-    <Drawer open={open} width={600} title={<Flex gap='small' align='center'><Logo logo={<LuBot size={27}/>}/> <h1>Create an {title} Agent</h1> </Flex>} onClose={() => setOpen(false)}>
-  <Flex vertical justify='space-between' className='h-[calc(100vh-119px)]'>
+    <Drawer open={open} width={600} title={<Flex gap='small' align='center'><EmojiAvatar pathname={pathname}/>
+               <h1 className='text-sm'>Create an {pathname === "/" ? "Voice"
+              : "Chat"
+              } Agent</h1> </Flex>} onClose={() => setOpen(false)}>
+  <Flex vertical justify='space-between' className='h-[calc(100vh-129px)]'>
     <div>
    <Typography.Title level={5}>Agent Name</Typography.Title>
     <Input placeholder='Enter name' value={agentName} onChange={(e)=> setAgentName(e.target.value)} className='py-2' />
     </div>
-    <Flex justify='flex-end'>
-
-    <Button className='w-fit' onClick={handleCreate}>Create Agent</Button>
-    </Flex>
+    <div className='w-full text-center pb-20'>
+      <SubmitButton text={`Create ${pathname === "/" ? "Voice":"Chat"} Agent`}
+              action={handleCreate}
+              />
+    </div>
   </Flex>
         </Drawer>
   )

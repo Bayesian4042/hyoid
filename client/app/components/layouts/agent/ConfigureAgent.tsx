@@ -1,7 +1,7 @@
 import { Button, Flex, Space, Spin, Typography } from "antd"
 import { Fragment, useEffect, useState } from "react";
 import { FiLink } from "react-icons/fi";
-import { SlOptions } from "react-icons/sl";
+import { HiMenuAlt4 } from "react-icons/hi";
 import VoiceOptions from "./voiceagent/VoiceOptions";
 import AgentOptions from "./voiceagent/AgentOptions";
 import { LoadingOutlined } from '@ant-design/icons';
@@ -9,6 +9,8 @@ import { getAgent } from "~/common/apis/api.request";
 import { Agent } from "~/types/agents";
 import { useLocation } from "@remix-run/react";
 import TestChat from "./chatagent/TestChat";
+import EmojiAvatar from "~/components/ui/EmojiAvatar";
+import SelectorOption from "~/components/ui/SelectorOption";
 
 const ConfigureAgent = ({agentId}:any) => {
   const{pathname} = useLocation()
@@ -37,37 +39,25 @@ const ConfigureAgent = ({agentId}:any) => {
         {loading ? <Flex className="h-screen border-l-[1px]" justify="center" align="center">
       <Spin indicator={<LoadingOutlined spin />}size="large"/>
       </Flex> : 
-    <div className="relative border-l-[1px] h-screen px-3 pt-4 overflow-y-scroll">
-      <Flex justify="space-between" className="px-1">
-        <div>
+    <div className="relative border-l-2 h-screen px-3 pt-4 overflow-y-scroll" style={{scrollbarWidth:"thin"}}>
+      <Flex justify="space-between" align="center" className="px-1">
+        <Flex gap='small'>
+         <EmojiAvatar pathname={pathname}/>         
+          <div>
           <h1 className="font-semibold">
            {agentData?.name}
           </h1>
           <h6 className="text-gray-500">
             {agentData?.id}
           </h6>
-        </div>
-        <Space>
-          <Button color="default" variant="solid">
-            Test AI agent
-          </Button>
-          <Button icon={<FiLink />}></Button>
-          <Button icon={<SlOptions />}></Button>
-        </Space>
+          </div>
+        </Flex>
+          <Button className="pt-1 rounded-full" icon={<HiMenuAlt4 size={20} />}></Button>
       </Flex>
-      <Space className="relative w-full mt-2">
-        <div className="absolute bottom-0 w-full border-b-[1px] ml-2"></div>
-        {options.map((option: string) => (
-          <h3
-            key={option}
-            className={`relative z-10 cursor-pointer py-2 text-sm ${selectedOption === option ? 'border-b-[1px] border-black  text-black' : 'border-b-[1px] border-transparent text-gray-500'
-              }`}
-            onClick={() => setSelectedOption(option)}
-          >
-            {option}
-          </h3>
-        ))}
-      </Space>
+      
+    <div className="mt-5">
+      <SelectorOption options={options} setSelectedOption={setSelectedOption} selectedOption={selectedOption}/>
+    </div>
 
       {selectedOption === "Voice" ? (
             <VoiceOptions />
