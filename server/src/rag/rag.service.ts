@@ -41,17 +41,17 @@ export class RagService {
 				}),
 			);
 
-			await this.pinecone.createIndex({
-				name: process.env.PINECONE_INDEX,
-				dimension: 1536,
-				metric: "cosine",
-				spec: {
-					serverless: {
-						cloud: "aws",
-						region: "us-east-1",
-					},
-				},
-			});
+			// await this.pinecone.createIndex({
+			// 	name: process.env.PINECONE_INDEX,
+			// 	dimension: 1536,
+			// 	metric: "cosine",
+			// 	spec: {
+			// 		serverless: {
+			// 			cloud: "aws",
+			// 			region: "us-east-1",
+			// 		},
+			// 	},
+			// });
 
 			const index = this.pinecone.index(process.env.PINECONE_INDEX);
 
@@ -105,7 +105,7 @@ export class RagService {
 			});
 
 			const relevantContext = queryResponse.matches
-				.filter((match: any) => match.metadata.score > 0.6)
+				.filter((match: any) => match.metadata.score > 0.3)
 				.map((match: any) => match.metadata.text)
 				.join("\n");
 

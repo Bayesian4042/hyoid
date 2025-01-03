@@ -39,8 +39,7 @@ export class TextConversationService {
 							messages: [
 								{
 									role: "system",
-									content:
-										"You are a helpful assistant",
+									content: await this.getSystemPrompt(agentId),
 								},
 							],
 						});
