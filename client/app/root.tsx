@@ -11,6 +11,7 @@ import "./tailwind.css";
 import React from "react";
 import Sidebar from "./components/layouts/sidebar/Sidebar";
 import { Flex } from "antd";
+import toggleStore from "./lib/zustand/toggleStore";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -44,11 +45,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+
+  const { showSidebar } = toggleStore();
   return (<Flex>
-    <div className="flex-[0.188]">
+    <div className={`${showSidebar ? "flex-[0.188]":""}`}>
     <Sidebar/>
     </div>
-    <div className="flex-[0.82]">
+    <div className={`${showSidebar?"flex-[0.82]":"flex-[0.9997]"}`}>
     <Outlet />
     </div>
   </Flex>) 

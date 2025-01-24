@@ -4,6 +4,8 @@ import { getChat } from "~/common/apis/api.request";
 import { WebSocketService, webSocketService } from "~/common/webhook/websocket";
 import { ChatAgent } from "~/types/agents";
 import { TestChatProps } from "~/types/common";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm"
 
 const TestChat:React.FC<TestChatProps> = ({agentId}) => {
   const [userInput, setUserInput] = useState<string>("");
@@ -102,7 +104,7 @@ const Message = ({ user, message }: { user: string; message: string }) => {
         <Avatar>{user[0]}</Avatar>
         <div className="font-bold text-xl text-gray-500">{user}</div>
       </Flex>
-      <Typography.Text>{message}</Typography.Text>
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{message}</ReactMarkdown>
     </Flex>
   );
 };
