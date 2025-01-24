@@ -41,7 +41,7 @@ export default function Index() {
   ];
 
   return (
-    <Flex >
+    <Flex className="w-full">
       <div className="flex-[0.30]">
         <HeaderWithAgent title='Voice Agent' buttons={buttons} setAgentId={setAgentId} agents={agents} />
       </div>
