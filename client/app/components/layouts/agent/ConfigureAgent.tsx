@@ -61,9 +61,7 @@ const ConfigureAgent = ({agentId}:any) => {
 
       {selectedOption === "Voice" ? (
             <VoiceOptions />
-          ) : selectedOption === "Test" ? (
-            <TestChat agentId={(agentData?.id )? agentData?.id : ""}/>
-          ) : (
+          )  : (
             agentData && <AgentOptions agentData={agentData} />
           )}
 
