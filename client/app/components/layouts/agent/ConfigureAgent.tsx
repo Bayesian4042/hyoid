@@ -1,23 +1,22 @@
-import { Button, Flex, Space, Spin, Typography } from "antd"
+import { Button, Flex, Spin } from "antd"
 import { Fragment, useEffect, useState } from "react";
-import { FiLink } from "react-icons/fi";
-import { HiMenuAlt4 } from "react-icons/hi";
 import VoiceOptions from "./voiceagent/VoiceOptions";
 import AgentOptions from "./voiceagent/AgentOptions";
 import { LoadingOutlined } from '@ant-design/icons';
 import { getAgent } from "~/common/apis/api.request";
 import { Agent } from "~/types/agents";
 import { useLocation } from "@remix-run/react";
-import TestChat from "./chatagent/TestChat";
 import EmojiAvatar from "~/components/ui/EmojiAvatar";
-import SelectorOption from "~/components/ui/SelectorOption";
+import { CiPlay1 } from "react-icons/ci";
+import { useNavigate } from "@remix-run/react";
 
 const ConfigureAgent = ({agentId}:any) => {
   const{pathname} = useLocation()
-  const [options, setOptions] = useState<string[]>(["Agent", pathname === "/"?"Voice":"Test"]);
   const [selectedOption, setSelectedOption] = useState<string>("Agent");
   const [loading,setLoading] = useState<boolean>(true)
   const [agentData,setAgentData]= useState<Agent>();
+  const navigate = useNavigate()
+
 
   const fetchData = async() => {
     setLoading(true);
@@ -52,18 +51,12 @@ const ConfigureAgent = ({agentId}:any) => {
           </h6>
           </div>
         </Flex>
-          <Button className="pt-1 rounded-full" icon={<HiMenuAlt4 size={20} />}></Button>
+          <Button className="pt-1 rounded-full font-semibold" icon={<CiPlay1 size={20} />} onClick={() =>navigate(`${pathname === "/"?"/" : /chatagent/}${agentData?.id}`)}>Run</Button>
       </Flex>
-      
-    <div className="mt-5">
-      <SelectorOption options={options} setSelectedOption={setSelectedOption} selectedOption={selectedOption}/>
-    </div>
 
       {selectedOption === "Voice" ? (
             <VoiceOptions />
-          ) : selectedOption === "Test" ? (
-            <TestChat agentId={(agentData?.id )? agentData?.id : ""}/>
-          ) : (
+          )  : (
             agentData && <AgentOptions agentData={agentData} />
           )}
 
