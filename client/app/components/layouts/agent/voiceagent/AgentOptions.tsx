@@ -12,7 +12,6 @@ import { Agent } from '~/types/agents'
 import { useLocation } from '@remix-run/react'
 import { Flag } from '~/types/common'
 import NumberInput from '~/components/ui/NumberInput'
-import TwitterScrapperDrawer from '../../drawer/TwitterScrapperDrawer'
 
 const AgentOptions = ({agentData}:{agentData:Agent}) => {
 
@@ -83,8 +82,6 @@ const AgentOptions = ({agentData}:{agentData:Agent}) => {
             <OpenModalButton title='Knowledge base' desc='Provided the LLM with domain-specific information to help it answer questions more accurately.' button='Add item' setOpen={setIsOpenKnowledgeBase}/>
             <Divider style={{ borderWidth: '1px' }} />
             <OpenModalButton title='Tools' desc='Provided the agent with tools it can use to help users.' button='Add tool' setOpen={setIsOpenTools}/>
-            <Divider style={{ borderWidth: '1px' }} />
-            <OpenModalButton title='Twitter Scraper' desc='Provide the agent with Twitter Scrapper. It can use to help users tweets insights.' button='Get Twitter' setOpen={setIsOpenTwitter}/>
             {
                 updateValue && 
                 <>
@@ -108,7 +105,6 @@ const AgentOptions = ({agentData}:{agentData:Agent}) => {
         </Space>
     <KnowledgeBaseDrawer  agentId={agentData.id} open={isOpenKnowledgeBase} setOpen={setIsOpenKnowledgeBase}/>
     <ToolsDrawer open={isOpenTools} setOpen={setIsOpenTools}/>
-    <TwitterScrapperDrawer open={isOpenTwitter} setOpen={setIsOpenTwitter} />
     </div>
     )
 }

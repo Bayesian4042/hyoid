@@ -9,7 +9,7 @@ const OpenModalButton:React.FC<OpenModalButtonProps> = ({title,desc,button,setOp
         <h1 className='font-semibold'>{title}</h1>
         <h6 className='text-gray-500'>{desc}</h6>
         </div>
-       <Button variant="solid" color="default" className="rounded-2xl" onClick={() => setOpen(true)}>{button}</Button>
+       <Button variant="solid" color="default" className="rounded-lg" onClick={() => setOpen(true)}>{button}</Button>
         </Flex>
   )
 }
