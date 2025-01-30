@@ -6,6 +6,8 @@ import { WebSocketService, webSocketService } from "~/common/webhook/websocket";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getChat } from "~/common/apis/api.request";
+import { useParams } from "@remix-run/react";
+
 
 export default function ChatAgent() {
   const [inputData, setInputData] = useState("");
@@ -13,6 +15,7 @@ export default function ChatAgent() {
   const [loading, setLoading] = useState<boolean>(false);
   const socketRef = useRef<WebSocketService | null>(null);
   const [chatData, setChatData] = useState<any>();
+  const params = useParams()
 
   const startChat = async () => {
     try {
@@ -59,7 +62,7 @@ export default function ChatAgent() {
     setMessages((prev) => [...prev, { user: "User", message: inputData }]);
     setLoading(true);
     if (inputData.trim()) {
-      socketRef.current?.sendMessage({ message: inputData, agentId: "676beea95499565fe48594c5" });
+      socketRef.current?.sendMessage({ message: inputData, agentId: params?.chatId });
       setInputData("");
     }
   };
