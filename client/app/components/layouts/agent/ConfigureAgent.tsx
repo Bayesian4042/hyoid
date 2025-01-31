@@ -49,7 +49,7 @@ const ConfigureAgent = ({agentId}:any) => {
           </h6>
           </div>
         </Flex>
-          <Button className="pt-1 rounded-full font-semibold" icon={<CiPlay1 size={20} />} onClick={() =>navigate(`${pathname === "/"?"/" : /chatagent/}${agentData?.id}`)}>Run</Button>
+          <Button className="pt-1 rounded-lg font-semibold" icon={<CiPlay1 size={20} />} onClick={() =>navigate(`${pathname === "/"?"/" : /chatagent/}${agentData?.id}`)}>Run</Button>
       </Flex>
           {
             agentData && <AgentOptions agentData={agentData} />
