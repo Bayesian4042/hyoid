@@ -9,6 +9,7 @@ import { getAllAgents } from "~/common/apis/api.request";
 import { useLoaderData } from "@remix-run/react";
 import { Agent } from "~/types/agents";
 import { IoMdAdd } from "react-icons/io";
+import toggleStore from "~/lib/zustand/toggleStore";
 
 export const meta: MetaFunction = () => {
   return [
@@ -25,6 +26,8 @@ export default function Index() {
   const [agentId, setAgentId] = useState<string | null>(null);
   const [agents,setAgents] = useState<Agent[]>()
   const allagents = useLoaderData<Agent[]>()  
+  const { showSidebar } = toggleStore();
+
     
   
   useEffect(() => {
@@ -42,10 +45,10 @@ export default function Index() {
 
   return (
     <Flex className="w-full">
-      <div className="flex-[0.30]">
+      <div className={`flex-[${showSidebar ?"0.30":"0.25"}]`}>
         <HeaderWithAgent title='Voice Agent' buttons={buttons} setAgentId={setAgentId} agents={agents} />
       </div>
-      <div className="flex-[0.70]">
+      <div className={`flex-[${showSidebar ?"0.70":"0.75"}]`}>
         {
         agentId ?
       <ConfigureAgent agentId={agentId}/> :

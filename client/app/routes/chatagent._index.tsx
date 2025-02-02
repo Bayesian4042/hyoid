@@ -8,6 +8,7 @@ import { useLoaderData } from "@remix-run/react";
 import { Agent } from "~/types/agents";
 import ConfigureAgent from "~/components/layouts/agent/ConfigureAgent";
 import { IoMdAdd } from "react-icons/io";
+import toggleStore from "~/lib/zustand/toggleStore";
 
 
 export default function ChatAgent() {
@@ -16,6 +17,7 @@ export default function ChatAgent() {
   const [agentId, setAgentId] = useState<string | null>(null);
   const [agents,setAgents] = useState<Agent[]>()
   const allagents = useLoaderData<Agent[]>()  
+  const { showSidebar } = toggleStore();
  
     
     
@@ -33,10 +35,10 @@ export default function ChatAgent() {
   ];
   return (
     <Flex>
-      <div className="flex-[0.30]">
+      <div className={`flex-[${showSidebar ?"0.30":"0.25"}]`}>
         <HeaderWithAgent title='Chat Agents' buttons={buttons} setAgentId={setAgentId} agents={agents} />
       </div>
-      <div className="flex-[0.70]">
+      <div className={`flex-[${showSidebar ?"0.70":"0.75"}]`}>
         {
           agentId ? <ConfigureAgent agentId={agentId}/> :
         <SelectAgent setOpen={setOpen}/>
