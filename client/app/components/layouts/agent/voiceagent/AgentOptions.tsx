@@ -141,7 +141,12 @@ const ConfigureAgent = ({
 
 const ConfigureWidget = () => {
     return(
-        <div>Coming Soon...</div>
+        <div>
+            <h1 className='font-semibold text-gray-900'>Embeded code</h1>
+            <div className='px-3 py-2 bg-gray-100 rounded-md'>
+                <div className='bg-white p-1 rounded-sm'>Coming soon...</div>
+            </div>
+        </div>
     )
 }
 
