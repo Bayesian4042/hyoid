@@ -6,6 +6,7 @@ import { Link, useLocation } from "@remix-run/react";
 import { RiChatAiLine, RiVoiceAiLine } from "react-icons/ri";
 import { LuPanelLeftOpen, LuPanelRightOpen } from "react-icons/lu";
 import toggleStore from "~/lib/zustand/toggleStore";
+import { LiaPhoneSolid } from "react-icons/lia";
 
 export default function Sidebar() {
   const { showSidebar, toggleShowSidebar } = toggleStore();
@@ -51,6 +52,14 @@ export default function Sidebar() {
                 icon={<RiChatAiLine size={20} />}
                 title="Chat Agent"
                 selected="/chatagent"
+                showSidebar={showSidebar}
+              />
+            </Link>
+            <Link to="/phonenumber">
+              <NavButton
+                icon={<LiaPhoneSolid size={20} />}
+                title="Phone Numbers"
+                selected="/phonenumber"
                 showSidebar={showSidebar}
               />
             </Link>

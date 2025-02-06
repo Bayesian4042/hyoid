@@ -1,6 +1,5 @@
 import { Button, Flex, Spin } from "antd"
 import { Fragment, useEffect, useState } from "react";
-import VoiceOptions from "./voiceagent/VoiceOptions";
 import AgentOptions from "./voiceagent/AgentOptions";
 import { LoadingOutlined } from '@ant-design/icons';
 import { getAgent } from "~/common/apis/api.request";
@@ -12,7 +11,6 @@ import { useNavigate } from "@remix-run/react";
 
 const ConfigureAgent = ({agentId}:any) => {
   const{pathname} = useLocation()
-  const [selectedOption, setSelectedOption] = useState<string>("Agent");
   const [loading,setLoading] = useState<boolean>(true)
   const [agentData,setAgentData]= useState<Agent>();
   const navigate = useNavigate()
@@ -53,12 +51,9 @@ const ConfigureAgent = ({agentId}:any) => {
         </Flex>
           <Button className="pt-1 rounded-lg font-semibold" icon={<CiPlay1 size={20} />} onClick={() =>navigate(`${pathname === "/"?"/" : /chatagent/}${agentData?.id}`)}>Run</Button>
       </Flex>
-
-      {selectedOption === "Voice" ? (
-            <VoiceOptions />
-          )  : (
+          {
             agentData && <AgentOptions agentData={agentData} />
-          )}
+          }
 
     </div>
     }

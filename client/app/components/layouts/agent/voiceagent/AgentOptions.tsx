@@ -16,6 +16,7 @@ import KnowledgeBaseDrawer from '../../drawer/KnowledgeBaseDrawer'
 import ToolsDrawer from '../../drawer/ToolsDrawer'
 import TwitterScrapperDrawer from '../../drawer/TwitterScrapperDrawer'
 
+
 const AgentOptions = ({ agentData }: { agentData: Agent }) => {
     const [isOpenKnowledgeBase, setIsOpenKnowledgeBase] = useState(false)
     const [isOpenTools, setIsOpenTools] = useState(false)
