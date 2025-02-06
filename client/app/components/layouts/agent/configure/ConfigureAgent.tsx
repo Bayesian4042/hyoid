@@ -1,6 +1,6 @@
 import { Button, Flex, Spin } from "antd"
 import { Fragment, useEffect, useState } from "react";
-import AgentOptions from "./voiceagent/AgentOptions";
+import AgentOptions from "./AgentOptions";
 import { LoadingOutlined } from '@ant-design/icons';
 import { getAgent } from "~/common/apis/api.request";
 import { Agent } from "~/types/agents";

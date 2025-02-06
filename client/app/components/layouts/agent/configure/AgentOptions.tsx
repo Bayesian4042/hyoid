@@ -14,7 +14,6 @@ import NumberInput from '~/components/ui/NumberInput'
 
 import KnowledgeBaseDrawer from '../../drawer/KnowledgeBaseDrawer'
 import ToolsDrawer from '../../drawer/ToolsDrawer'
-import TwitterScrapperDrawer from '../../drawer/TwitterScrapperDrawer'
 
 
 const AgentOptions = ({ agentData }: { agentData: Agent }) => {
@@ -65,7 +64,6 @@ const AgentOptions = ({ agentData }: { agentData: Agent }) => {
             <Tabs className='mx-4 mt-1' defaultActiveKey="1" items={items} />
             <KnowledgeBaseDrawer agentId={agentData.id} open={isOpenKnowledgeBase} setOpen={setIsOpenKnowledgeBase} />
             <ToolsDrawer open={isOpenTools} setOpen={setIsOpenTools} />
-            <TwitterScrapperDrawer open={isOpenTwitter} setOpen={setIsOpenTwitter} />
         </div>
     )
 }
@@ -116,9 +114,6 @@ const ConfigureAgent = ({
 
             <Divider style={{ borderWidth: '1px' }} />
             <OpenModalButton title="Tools" desc="Provide the agent with tools it can use to help users." button="Add tool" setOpen={setIsOpenTools} />
-
-            <Divider style={{ borderWidth: '1px' }} />
-            <OpenModalButton title="Twitter Scraper" desc="Provide the agent with a Twitter Scraper for tweet insights." button="Get Twitter" setOpen={setIsOpenTwitter} />
 
             {hasUnsavedChanges && (
                 <>
