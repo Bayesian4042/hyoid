@@ -1,10 +1,9 @@
 import { Button, Divider, Flex, Space, Tabs, TabsProps } from 'antd'
-import { useEffect, useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { updateAgent } from '~/common/apis/api.request'
 import { IoWarningOutline } from "react-icons/io5"
 import { useLocation } from '@remix-run/react'
 import { Agent } from '~/types/agents'
-import { Flag } from '~/types/common'
 
 import InputField from '~/components/ui/InputField'
 import OpenModalButton from '~/components/ui/OpenModalButton'
@@ -19,7 +18,6 @@ import ToolsDrawer from '../../drawer/ToolsDrawer'
 const AgentOptions = ({ agentData }: { agentData: Agent }) => {
     const [isOpenKnowledgeBase, setIsOpenKnowledgeBase] = useState(false)
     const [isOpenTools, setIsOpenTools] = useState(false)
-    const [isOpenTwitter, setIsOpenTwitter] = useState(false)
 
     const [contactNumber, setContactNumber] = useState<number | null>(null)
     const [firstMessage, setFirstMessage] = useState(agentData?.firstMessage)
@@ -54,7 +52,6 @@ const AgentOptions = ({ agentData }: { agentData: Agent }) => {
             loading={loading}
             setIsOpenKnowledgeBase={setIsOpenKnowledgeBase}
             setIsOpenTools={setIsOpenTools}
-            setIsOpenTwitter={setIsOpenTwitter}
         /> },
         { key: '2', label: 'Widget', children: <ConfigureWidget/> },
     ]
@@ -82,7 +79,6 @@ const ConfigureAgent = ({
     loading,
     setIsOpenKnowledgeBase,
     setIsOpenTools,
-    setIsOpenTwitter,
 }:any) => {
     const { pathname } = useLocation()
 
