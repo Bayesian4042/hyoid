@@ -4,6 +4,7 @@ import { updateAgent } from '~/common/apis/api.request'
 import { IoWarningOutline } from "react-icons/io5"
 import { useLocation } from '@remix-run/react'
 import { Agent } from '~/types/agents'
+import { BiCopy } from "react-icons/bi";
 
 import InputField from '~/components/ui/InputField'
 import OpenModalButton from '~/components/ui/OpenModalButton'
@@ -53,7 +54,7 @@ const AgentOptions = ({ agentData }: { agentData: Agent }) => {
             setIsOpenKnowledgeBase={setIsOpenKnowledgeBase}
             setIsOpenTools={setIsOpenTools}
         /> },
-        { key: '2', label: 'Widget', children: <ConfigureWidget/> },
+        { key: '2', label: 'Widget', children: <ConfigureWidget id={agentData?.id}/> },
     ]
 
     return (
@@ -131,15 +132,51 @@ const ConfigureAgent = ({
 
 
 
-const ConfigureWidget = () => {
-    return(
-        <div>
-            <h1 className='font-semibold text-gray-900'>Embeded code</h1>
-            <div className='px-3 py-2 bg-gray-100 rounded-md'>
-                <div className='bg-white p-1 rounded-sm'>Coming soon...</div>
-            </div>
+
+const ConfigureWidget = ({ id }: { id: string }) => {
+  const [copied, setCopied] = useState(false);
+
+  const scriptCode = `<script
+  async
+  id="voice-workflow-chat-widget"
+  src="http://localhost:5173/chatWidget.js"
+  chatbot-id="${id}"
+></script>`;
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(scriptCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy text:", err);
+    }
+  };
+
+  return (
+    <div>
+      <h1 className="font-semibold text-gray-900 mb-2">Embedded Code</h1>
+      <div className="relative px-4 py-3 bg-gray-100 rounded-md border border-gray-300">
+        <pre className="overflow-x-auto text-sm text-gray-800 font-mono">
+          <code>{scriptCode}</code>
+        </pre>
+        <div
+          onClick={copyToClipboard}
+          className="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-800 cursor-pointer"
+          aria-label="Copy to clipboard"
+        >
+          <BiCopy/>
         </div>
-    )
-}
+        {copied && (
+          <span className="absolute top-2 right-10 text-xs text-green-500">
+            Copied!
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
 
 export default AgentOptions
