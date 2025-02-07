@@ -1,10 +1,9 @@
 import { Button, Divider, Flex, Space, Tabs, TabsProps } from 'antd'
-import { useEffect, useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { updateAgent } from '~/common/apis/api.request'
 import { IoWarningOutline } from "react-icons/io5"
 import { useLocation } from '@remix-run/react'
 import { Agent } from '~/types/agents'
-import { Flag } from '~/types/common'
 
 import InputField from '~/components/ui/InputField'
 import OpenModalButton from '~/components/ui/OpenModalButton'
@@ -14,13 +13,11 @@ import NumberInput from '~/components/ui/NumberInput'
 
 import KnowledgeBaseDrawer from '../../drawer/KnowledgeBaseDrawer'
 import ToolsDrawer from '../../drawer/ToolsDrawer'
-import TwitterScrapperDrawer from '../../drawer/TwitterScrapperDrawer'
 
 
 const AgentOptions = ({ agentData }: { agentData: Agent }) => {
     const [isOpenKnowledgeBase, setIsOpenKnowledgeBase] = useState(false)
     const [isOpenTools, setIsOpenTools] = useState(false)
-    const [isOpenTwitter, setIsOpenTwitter] = useState(false)
 
     const [contactNumber, setContactNumber] = useState<number | null>(null)
     const [firstMessage, setFirstMessage] = useState(agentData?.firstMessage)
@@ -55,7 +52,6 @@ const AgentOptions = ({ agentData }: { agentData: Agent }) => {
             loading={loading}
             setIsOpenKnowledgeBase={setIsOpenKnowledgeBase}
             setIsOpenTools={setIsOpenTools}
-            setIsOpenTwitter={setIsOpenTwitter}
         /> },
         { key: '2', label: 'Widget', children: <ConfigureWidget/> },
     ]
@@ -65,7 +61,6 @@ const AgentOptions = ({ agentData }: { agentData: Agent }) => {
             <Tabs className='mx-4 mt-1' defaultActiveKey="1" items={items} />
             <KnowledgeBaseDrawer agentId={agentData.id} open={isOpenKnowledgeBase} setOpen={setIsOpenKnowledgeBase} />
             <ToolsDrawer open={isOpenTools} setOpen={setIsOpenTools} />
-            <TwitterScrapperDrawer open={isOpenTwitter} setOpen={setIsOpenTwitter} />
         </div>
     )
 }
@@ -84,7 +79,6 @@ const ConfigureAgent = ({
     loading,
     setIsOpenKnowledgeBase,
     setIsOpenTools,
-    setIsOpenTwitter,
 }:any) => {
     const { pathname } = useLocation()
 
@@ -116,9 +110,6 @@ const ConfigureAgent = ({
 
             <Divider style={{ borderWidth: '1px' }} />
             <OpenModalButton title="Tools" desc="Provide the agent with tools it can use to help users." button="Add tool" setOpen={setIsOpenTools} />
-
-            <Divider style={{ borderWidth: '1px' }} />
-            <OpenModalButton title="Twitter Scraper" desc="Provide the agent with a Twitter Scraper for tweet insights." button="Get Twitter" setOpen={setIsOpenTwitter} />
 
             {hasUnsavedChanges && (
                 <>

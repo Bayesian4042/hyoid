@@ -1,7 +1,7 @@
 import { Flex } from 'antd'
 import { useState } from 'react'
 import { IoMdAdd } from 'react-icons/io';
-import ConfigureAgent from '~/components/layouts/agent/ConfigureAgent';
+import ConfigureAgent from '~/components/layouts/agent/configure/ConfigureAgent';
 import SelectAgent from '~/components/layouts/agent/SelectAgent';
 import AddPhoneNumberDrawer from '~/components/layouts/drawer/AddPhoneNumberDrawer';
 import HeaderWithAgent from '~/components/layouts/header/HeaderWithAgent';

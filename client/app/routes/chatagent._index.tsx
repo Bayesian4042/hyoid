@@ -6,7 +6,7 @@ import HeaderWithAgent from "~/components/layouts/header/HeaderWithAgent";
 import { getAllAgents } from "~/common/apis/api.request";
 import { useLoaderData } from "@remix-run/react";
 import { Agent } from "~/types/agents";
-import ConfigureAgent from "~/components/layouts/agent/ConfigureAgent";
+import ConfigureAgent from "~/components/layouts/agent/configure/ConfigureAgent";
 import { IoMdAdd } from "react-icons/io";
 import toggleStore from "~/lib/zustand/toggleStore";
 

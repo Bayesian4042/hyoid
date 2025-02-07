@@ -6,7 +6,6 @@ const SelectorOption = ({options,setSelectedOption,selectedOption}:any) => {
         {options?.map((option:string) => 
         <div key={option} className={`${selectedOption === option ? "bg-white" :""}  py-1.5 px-2 w-full text-center rounded-md cursor-pointer font-semibold`} onClick={() => setSelectedOption(option)}>{option}</div>
         )}
-        
     </Flex>
   )
 }
