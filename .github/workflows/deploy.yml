@@ -78,8 +78,9 @@ jobs:
           name: build_artifacts
           path: build_artifacts.tar.gz
 
-  deploy:
+  deploy-server:
     needs: build
+    if: env.server == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Download Build Artifacts
@@ -87,32 +88,76 @@ jobs:
         with:
           name: build_artifacts
 
-      - name: Transfer Build to EC2
+      - name: Transfer Build to Backend EC2
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.EC2_HOST }}
+          host: ${{ secrets.BACKEND_EC2_HOST }}
           username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ secrets.BACKEND_EC2_SSH_KEY }}
           source: "build_artifacts.tar.gz"
           target: "/home/ubuntu/"
 
-      - name: SSH into EC2 & Deploy
+      - name: SSH into Backend EC2 & Deploy
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }}
+          host: ${{ secrets.BACKEND_EC2_HOST }}
           username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ secrets.BACKEND_EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu
+            tar -xzvf build_artifacts.tar.gz
+
+            # Remove old build
+            rm -rf /home/ubuntu/voice-workflow/server/dist /home/ubuntu/voice-workflow/server/prisma
+
+            # Move new build
+            mv build_artifacts/server/* /home/ubuntu/voice-workflow/server/
+
+            # Cleanup
+            rm -rf build_artifacts build_artifacts.tar.gz
+
+            # Install dependencies & restart server
+            cd /home/ubuntu/voice-workflow/server
+            pnpm install --frozen-lockfile
+            pnpm prisma generate
+            pm2 restart server
+
+            echo "✅ Server Deployment Completed!"
+
+  deploy-client-widget:
+    needs: build
+    if: env.client == 'true' || env.widget == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build_artifacts
+
+      - name: Transfer Build to Frontend EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.FRONTEND_EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.FRONTEND_EC2_SSH_KEY }}
+          source: "build_artifacts.tar.gz"
+          target: "/home/ubuntu/"
+
+      - name: SSH into Frontend EC2 & Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.FRONTEND_EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.FRONTEND_EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu
             tar -xzvf build_artifacts.tar.gz
 
             # Remove old builds if needed
-            [ -d "build_artifacts/server" ] && rm -rf /home/ubuntu/voice-workflow/server/dist /home/ubuntu/voice-workflow/server/prisma
             [ -d "build_artifacts/client" ] && rm -rf /home/ubuntu/voice-workflow/client/build
             [ -d "build_artifacts/widget" ] && rm -rf /home/ubuntu/voice-workflow/widget/build
 
             # Move new builds
-            [ -d "build_artifacts/server" ] && mv build_artifacts/server/* /home/ubuntu/voice-workflow/server/
             [ -d "build_artifacts/client" ] && mv build_artifacts/client/* /home/ubuntu/voice-workflow/client/
             [ -d "build_artifacts/widget" ] && mv build_artifacts/widget/* /home/ubuntu/voice-workflow/widget/
 
@@ -120,14 +165,6 @@ jobs:
             rm -rf build_artifacts build_artifacts.tar.gz
 
             # Install dependencies & restart services
-            if [ -d "/home/ubuntu/voice-workflow/server/dist" ]; then
-              echo "🔧 Installing dependencies for server..."
-              cd /home/ubuntu/voice-workflow/server
-              pnpm install --frozen-lockfile
-              pnpm prisma generate
-              pm2 restart server
-            fi
-
             if [ -d "/home/ubuntu/voice-workflow/client/build" ]; then
               echo "🔧 Installing dependencies for client..."
               cd /home/ubuntu/voice-workflow/client
@@ -142,4 +179,4 @@ jobs:
               pm2 restart widget
             fi
 
-            echo "✅ Deployment Completed!"
+            echo "✅ Client & Widget Deployment Completed!"
