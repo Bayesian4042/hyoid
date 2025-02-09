@@ -1,0 +1,89 @@
+name: Deploy to EC2
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          pnpm install --frozen-lockfile
+
+      - name: Build Server
+        run: |
+          cd server
+          pnpm run build
+        if: contains(github.event.head_commit.modified, 'server/')
+
+      - name: Build Client
+        run: |
+          cd client
+          pnpm run build
+        if: contains(github.event.head_commit.modified, 'client/')
+
+      - name: Build Widget
+        run: |
+          cd widget
+          pnpm run build
+        if: contains(github.event.head_commit.modified, 'widget/')
+
+      - name: Archive Build Files
+        run: |
+          mkdir -p build_artifacts
+          cp -r server/dist build_artifacts/server-dist
+          cp -r client/dist build_artifacts/client-dist
+          cp -r widget/dist build_artifacts/widget-dist
+          tar -czvf build_artifacts.tar.gz build_artifacts
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build_artifacts
+          path: build_artifacts.tar.gz
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build_artifacts
+
+      - name: Transfer Build to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "build_artifacts.tar.gz"
+          target: "/home/ubuntu/"
+
+      - name: SSH into EC2 & Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu
+            tar -xzvf build_artifacts.tar.gz
+            rm -rf /home/ubuntu/voice-workflow/server/dist
+            rm -rf /home/ubuntu/voice-workflow/client/dist
+            rm -rf /home/ubuntu/voice-workflow/widget/dist
+            mv build_artifacts/server-dist /home/ubuntu/voice-workflow/server/dist
+            mv build_artifacts/client-dist /home/ubuntu/voice-workflow/client/dist
+            mv build_artifacts/widget-dist /home/ubuntu/voice-workflow/widget/dist
+            rm -rf build_artifacts build_artifacts.tar.gz
+
+            echo "♻️ Restarting Services..."
+            pm2 restart server
+            pm2 restart client
+            pm2 restart widget
+
+            echo "✅ Deployment Completed!"
