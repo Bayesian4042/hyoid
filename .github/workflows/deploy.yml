@@ -13,40 +13,63 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18 # Specify the Node.js version you want
+          node-version: 20
 
       - name: Install pnpm
-        run: |
-          npm install -g pnpm
+        run: npm install -g pnpm
 
       - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for Modified Files
+        id: changes
         run: |
-          pnpm install --frozen-lockfile
+          echo "Checking for modified files..."
+          echo "server=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^server/' && echo 'true' || echo 'false')" >> $GITHUB_ENV
+          echo "client=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^client/' && echo 'true' || echo 'false')" >> $GITHUB_ENV
+          echo "widget=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^widget/' && echo 'true' || echo 'false')" >> $GITHUB_ENV
 
       - name: Build Server
+        if: env.server == 'true'
         run: |
           cd server
           pnpm run build
-        if: contains(github.event.head_commit.modified, 'server/')
 
       - name: Build Client
+        if: env.client == 'true'
         run: |
           cd client
           pnpm run build
-        if: contains(github.event.head_commit.modified, 'client/')
 
       - name: Build Widget
+        if: env.widget == 'true'
         run: |
           cd widget
           pnpm run build
-        if: contains(github.event.head_commit.modified, 'widget/')
 
       - name: Archive Build Files
         run: |
           mkdir -p build_artifacts
-          cp -r server/dist build_artifacts/server-dist
-          cp -r client/dist build_artifacts/client-dist
-          cp -r widget/dist build_artifacts/widget-dist
+
+          if [ "$server" == "true" ]; then
+            mkdir -p build_artifacts/server
+            cp -r server/dist build_artifacts/server/
+            cp -r server/prisma build_artifacts/server/
+            cp server/package.json server/pnpm-lock.yaml build_artifacts/server/
+          fi
+
+          if [ "$client" == "true" ]; then
+            mkdir -p build_artifacts/client
+            cp -r client/build build_artifacts/client/
+            cp client/package.json client/pnpm-lock.yaml build_artifacts/client/
+          fi
+
+          if [ "$widget" == "true" ]; then
+            mkdir -p build_artifacts/widget
+            cp -r widget/build build_artifacts/widget/
+            cp widget/package.json widget/pnpm-lock.yaml build_artifacts/widget/
+          fi
+
           tar -czvf build_artifacts.tar.gz build_artifacts
 
       - name: Upload Build Artifacts
@@ -82,17 +105,41 @@ jobs:
           script: |
             cd /home/ubuntu
             tar -xzvf build_artifacts.tar.gz
-            rm -rf /home/ubuntu/voice-workflow/server/dist
-            rm -rf /home/ubuntu/voice-workflow/client/dist
-            rm -rf /home/ubuntu/voice-workflow/widget/dist
-            mv build_artifacts/server-dist /home/ubuntu/voice-workflow/server/dist
-            mv build_artifacts/client-dist /home/ubuntu/voice-workflow/client/dist
-            mv build_artifacts/widget-dist /home/ubuntu/voice-workflow/widget/dist
+
+            # Remove old builds if needed
+            [ -d "build_artifacts/server" ] && rm -rf /home/ubuntu/voice-workflow/server/dist /home/ubuntu/voice-workflow/server/prisma
+            [ -d "build_artifacts/client" ] && rm -rf /home/ubuntu/voice-workflow/client/build
+            [ -d "build_artifacts/widget" ] && rm -rf /home/ubuntu/voice-workflow/widget/build
+
+            # Move new builds
+            [ -d "build_artifacts/server" ] && mv build_artifacts/server/* /home/ubuntu/voice-workflow/server/
+            [ -d "build_artifacts/client" ] && mv build_artifacts/client/* /home/ubuntu/voice-workflow/client/
+            [ -d "build_artifacts/widget" ] && mv build_artifacts/widget/* /home/ubuntu/voice-workflow/widget/
+
+            # Cleanup
             rm -rf build_artifacts build_artifacts.tar.gz
 
-            echo "♻️ Restarting Services..."
-            pm2 restart server
-            pm2 restart client
-            pm2 restart widget
+            # Install dependencies & restart services
+            if [ -d "/home/ubuntu/voice-workflow/server/dist" ]; then
+              echo "🔧 Installing dependencies for server..."
+              cd /home/ubuntu/voice-workflow/server
+              pnpm install --frozen-lockfile
+              pnpm prisma generate
+              pm2 restart server
+            fi
+
+            if [ -d "/home/ubuntu/voice-workflow/client/build" ]; then
+              echo "🔧 Installing dependencies for client..."
+              cd /home/ubuntu/voice-workflow/client
+              pnpm install --frozen-lockfile
+              pm2 restart client
+            fi
+
+            if [ -d "/home/ubuntu/voice-workflow/widget/build" ]; then
+              echo "🔧 Installing dependencies for widget..."
+              cd /home/ubuntu/voice-workflow/widget
+              pnpm install --frozen-lockfile
+              pm2 restart widget
+            fi
 
             echo "✅ Deployment Completed!"
