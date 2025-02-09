@@ -41,7 +41,7 @@ jobs:
           tar -czvf build_artifacts.tar.gz build_artifacts
 
       - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build_artifacts
           path: build_artifacts.tar.gz
@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build_artifacts
 
