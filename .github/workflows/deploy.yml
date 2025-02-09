@@ -6,6 +6,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      server: ${{ steps.changes.outputs.server }}
+      client: ${{ steps.changes.outputs.client }}
+      widget: ${{ steps.changes.outputs.widget }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -28,6 +32,10 @@ jobs:
           echo "server=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^server/' && echo 'true' || echo 'false')" >> $GITHUB_ENV
           echo "client=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^client/' && echo 'true' || echo 'false')" >> $GITHUB_ENV
           echo "widget=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^widget/' && echo 'true' || echo 'false')" >> $GITHUB_ENV
+
+          echo "::set-output name=server::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^server/' && echo 'true' || echo 'false')"
+          echo "::set-output name=client::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^client/' && echo 'true' || echo 'false')"
+          echo "::set-output name=widget::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^widget/' && echo 'true' || echo 'false')"
 
       - name: Build Server
         if: ${{ env.server == 'true' }}
@@ -80,7 +88,7 @@ jobs:
 
   deploy-server:
     needs: build
-    if: ${{ env.server == 'true' }}
+    if: ${{ needs.build.outputs.server == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Download Build Artifacts
@@ -119,14 +127,13 @@ jobs:
             # Install dependencies & restart server
             cd /home/ubuntu/voice-workflow/server
             pnpm install --frozen-lockfile
-            pnpm prisma generate
             pm2 restart server
 
             echo "✅ Server Deployment Completed!"
 
   deploy-client-widget:
     needs: build
-    if: ${{ env.client == 'true' || env.widget == 'true' }}
+    if: ${{ needs.build.outputs.client == 'true' || needs.build.outputs.widget == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Download Build Artifacts
