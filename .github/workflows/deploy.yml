@@ -30,19 +30,19 @@ jobs:
           echo "widget=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^widget/' && echo 'true' || echo 'false')" >> $GITHUB_ENV
 
       - name: Build Server
-        if: env.server == 'true'
+        if: ${{ env.server == 'true' }}
         run: |
           cd server
           pnpm run build
 
       - name: Build Client
-        if: env.client == 'true'
+        if: ${{ env.client == 'true' }}
         run: |
           cd client
           pnpm run build
 
       - name: Build Widget
-        if: env.widget == 'true'
+        if: ${{ env.widget == 'true' }}
         run: |
           cd widget
           pnpm run build
@@ -80,7 +80,7 @@ jobs:
 
   deploy-server:
     needs: build
-    if: env.server == 'true'
+    if: ${{ env.server == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Download Build Artifacts
@@ -126,7 +126,7 @@ jobs:
 
   deploy-client-widget:
     needs: build
-    if: env.client == 'true' || env.widget == 'true'
+    if: ${{ env.client == 'true' || env.widget == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Download Build Artifacts
