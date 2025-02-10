@@ -1,0 +1,189 @@
+name: Deploy to EC2
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      server: ${{ steps.changes.outputs.server }}
+      client: ${{ steps.changes.outputs.client }}
+      widget: ${{ steps.changes.outputs.widget }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for Modified Files
+        id: changes
+        run: |
+          echo "Checking for modified files..."
+          echo "server=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^server/' && echo 'true' || echo 'false')" >> $GITHUB_ENV
+          echo "client=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^client/' && echo 'true' || echo 'false')" >> $GITHUB_ENV
+          echo "widget=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^widget/' && echo 'true' || echo 'false')" >> $GITHUB_ENV
+
+          echo "::set-output name=server::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^server/' && echo 'true' || echo 'false')"
+          echo "::set-output name=client::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^client/' && echo 'true' || echo 'false')"
+          echo "::set-output name=widget::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^widget/' && echo 'true' || echo 'false')"
+
+      - name: Build Server
+        if: ${{ env.server == 'true' }}
+        run: |
+          cd server
+          pnpm run build
+
+      - name: Build Client
+        if: ${{ env.client == 'true' }}
+        run: |
+          cd client
+          pnpm run build
+
+      - name: Build Widget
+        if: ${{ env.widget == 'true' }}
+        run: |
+          cd widget
+          pnpm run build
+
+      - name: Archive Build Files
+        run: |
+          mkdir -p build_artifacts
+
+          if [ "$server" == "true" ]; then
+            mkdir -p build_artifacts/server
+            cp -r server/dist build_artifacts/server/
+            cp -r server/prisma build_artifacts/server/
+            cp server/package.json server/pnpm-lock.yaml build_artifacts/server/
+          fi
+
+          if [ "$client" == "true" ]; then
+            mkdir -p build_artifacts/client
+            cp -r client/build build_artifacts/client/
+            cp client/package.json client/pnpm-lock.yaml build_artifacts/client/
+          fi
+
+          if [ "$widget" == "true" ]; then
+            mkdir -p build_artifacts/widget
+            cp -r widget/build build_artifacts/widget/
+            cp widget/package.json widget/pnpm-lock.yaml build_artifacts/widget/
+          fi
+
+          tar -czvf build_artifacts.tar.gz build_artifacts
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build_artifacts
+          path: build_artifacts.tar.gz
+
+  deploy-server:
+    needs: build
+    if: ${{ needs.build.outputs.server == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build_artifacts
+
+      - name: Transfer Build to Backend EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.BACKEND_EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.BACKEND_EC2_SSH_KEY }}
+          source: "build_artifacts.tar.gz"
+          target: "/home/ubuntu/"
+
+      - name: SSH into Backend EC2 & Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.BACKEND_EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.BACKEND_EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu
+            tar -xzvf build_artifacts.tar.gz
+
+            # Remove old build
+            rm -rf /home/ubuntu/voice-workflow/server/dist /home/ubuntu/voice-workflow/server/prisma
+
+            # Move new build
+            mv build_artifacts/server/* /home/ubuntu/voice-workflow/server/
+
+            # Cleanup
+            rm -rf build_artifacts build_artifacts.tar.gz
+
+            # Install dependencies & restart server
+            cd /home/ubuntu/voice-workflow/server
+            pnpm install --frozen-lockfile
+            pm2 restart server
+
+            echo "✅ Server Deployment Completed!"
+
+  deploy-client-widget:
+    needs: build
+    if: ${{ needs.build.outputs.client == 'true' || needs.build.outputs.widget == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build_artifacts
+
+      - name: Transfer Build to Frontend EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.FRONTEND_EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.FRONTEND_EC2_SSH_KEY }}
+          source: "build_artifacts.tar.gz"
+          target: "/home/ubuntu/"
+
+      - name: SSH into Frontend EC2 & Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.FRONTEND_EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.FRONTEND_EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu
+            tar -xzvf build_artifacts.tar.gz
+
+            # Remove old builds if needed
+            [ -d "build_artifacts/client" ] && rm -rf /home/ubuntu/voice-workflow/client/build
+            [ -d "build_artifacts/widget" ] && rm -rf /home/ubuntu/voice-workflow/widget/build
+
+            # Move new builds
+            [ -d "build_artifacts/client" ] && mv build_artifacts/client/* /home/ubuntu/voice-workflow/client/
+            [ -d "build_artifacts/widget" ] && mv build_artifacts/widget/* /home/ubuntu/voice-workflow/widget/
+
+            # Cleanup
+            rm -rf build_artifacts build_artifacts.tar.gz
+
+            # Install dependencies & restart services
+            if [ -d "/home/ubuntu/voice-workflow/client/build" ]; then
+              echo "🔧 Installing dependencies for client..."
+              cd /home/ubuntu/voice-workflow/client
+              pnpm install --frozen-lockfile
+              pm2 restart client
+            fi
+
+            if [ -d "/home/ubuntu/voice-workflow/widget/build" ]; then
+              echo "🔧 Installing dependencies for widget..."
+              cd /home/ubuntu/voice-workflow/widget
+              pnpm install --frozen-lockfile
+              pm2 restart widget
+            fi
+
+            echo "✅ Client & Widget Deployment Completed!"
