@@ -17,9 +17,9 @@ export default function Sidebar() {
         <Space direction="vertical" size={30} className={`w-full ${showSidebar ? "border-b-2 pb-4" :""}`}>
           <div className="flex items-center justify-between">
             {showSidebar && (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2.5">
                 <RiVoiceAiLine size={25} />
-                <h1 className="text-xs font-semibold">VOICE-WORKFLOW</h1>
+                <h1 className="text-base font-bold">HYOID</h1>
               </div>
             )}
             <button
