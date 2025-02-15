@@ -63,7 +63,7 @@ export default function Index() {
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`p-3 my-2 rounded-lg ${
+                className={`px-3 py-2 my-2 rounded-lg ${
                   msg.user === "User"
                     ? "bg-blue-500 text-white self-end"
                     : "bg-gray-200 text-black self-start"
